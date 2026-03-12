@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChargeGuard — Automação de Chargebacks via Pagar.me</title>
+    <meta name="description" content="Sistema de automação de chargebacks integrado com Pagar.me, geração de carta de defesa e checklist de provas.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="8" fill="url(#logoGrad)"/><path d="M8 14.5L12 18.5L20 10.5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="logoGrad" x1="0" y1="0" x2="28" y2="28"><stop stop-color="#6366f1"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs></svg>
+                </div>
+                <span class="logo-text">ChargeGuard</span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-page="dashboard" id="nav-dashboard">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item" data-page="novo-chargeback" id="nav-novo">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                <span>Novo Chargeback</span>
+            </a>
+            <a href="#" class="nav-item" data-page="casos" id="nav-casos">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <span>Gestão de Casos</span>
+            </a>
+            <a href="#" class="nav-item" data-page="fluxo" id="nav-fluxo">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                <span>Fluxo Automatizado</span>
+            </a>
+            <a href="#" class="nav-item" data-page="defesa" id="nav-defesa">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <span>Defesa Pagar.me</span>
+                <span class="nav-badge">Novo</span>
+            </a>
+            <a href="#" class="nav-item" data-page="config" id="nav-config">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                <span>Configurações</span>
+            </a>
+            <a href="#" class="nav-item" data-page="relatorios" id="nav-relatorios">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                <span>Relatórios</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="pagarme-status" id="pagarme-status">
+                <div class="status-dot disconnected"></div>
+                <span>Pagar.me Desconectado</span>
+            </div>
+            <div class="user-info">
+                <div class="user-avatar">V</div>
+                <div class="user-details">
+                    <span class="user-name">Vinicius</span>
+                    <span class="user-role">Administrador</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content" id="main-content">
+        <header class="header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menu-toggle">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                </button>
+                <div class="page-title-area">
+                    <h1 id="page-title">Dashboard</h1>
+                    <p class="page-subtitle" id="page-subtitle">Visão geral dos chargebacks</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="search-box" id="search-box">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input type="text" placeholder="Buscar chargeback..." id="search-input">
+                </div>
+                <button class="notification-btn" id="notification-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    <span class="notification-badge" id="notification-badge">3</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Page: Dashboard -->
+        <section class="page active" id="page-dashboard">
+            <div class="metrics-grid">
+                <div class="metric-card"><div class="metric-icon blue"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="metric-info"><span class="metric-label">Total de Chargebacks</span><span class="metric-value" id="metric-total-value">0</span><span class="metric-trend up"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>+12% este mês</span></div></div>
+                <div class="metric-card"><div class="metric-icon orange"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><div class="metric-info"><span class="metric-label">Em Disputa</span><span class="metric-value" id="metric-disputa-value">0</span><span class="metric-trend neutral"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>Estável</span></div></div>
+                <div class="metric-card"><div class="metric-icon green"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="metric-info"><span class="metric-label">Valor Recuperado</span><span class="metric-value" id="metric-recuperado-value">R$ 0</span><span class="metric-trend up"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>+23% vs mês anterior</span></div></div>
+                <div class="metric-card"><div class="metric-icon purple"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div class="metric-info"><span class="metric-label">Taxa de Sucesso</span><span class="metric-value" id="metric-taxa-value">0%</span><span class="metric-trend up"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>+5% vs mês anterior</span></div></div>
+            </div>
+            <div class="charts-row">
+                <div class="chart-card"><div class="chart-header"><h3>Chargebacks ao Longo do Tempo</h3><div class="chart-actions"><button class="chart-btn active" data-period="7d">7D</button><button class="chart-btn" data-period="30d">30D</button><button class="chart-btn" data-period="90d">90D</button></div></div><canvas id="timeline-chart" width="600" height="250"></canvas></div>
+                <div class="chart-card"><div class="chart-header"><h3>Motivos dos Chargebacks</h3></div><canvas id="reasons-chart" width="300" height="250"></canvas></div>
+            </div>
+            <div class="recent-cases-card"><div class="card-header"><h3>Casos Recentes</h3><button class="btn-link" id="btn-ver-todos">Ver todos →</button></div><div class="cases-table-container"><table class="cases-table"><thead><tr><th>ID</th><th>Cliente</th><th>Valor</th><th>Motivo</th><th>Status</th><th>Prazo</th><th>Ações</th></tr></thead><tbody id="recent-cases-body"></tbody></table></div></div>
+        </section>
+
+        <!-- Page: Novo Chargeback -->
+        <section class="page" id="page-novo-chargeback">
+            <div class="form-container">
+                <div class="form-card">
+                    <div class="form-section">
+                        <h3 class="form-section-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Dados do Cliente</h3>
+                        <div class="form-grid">
+                            <div class="form-group"><label for="cliente-nome">Nome do Cliente</label><input type="text" id="cliente-nome" placeholder="Nome completo"></div>
+                            <div class="form-group"><label for="cliente-email">E-mail</label><input type="email" id="cliente-email" placeholder="email@exemplo.com"></div>
+                            <div class="form-group"><label for="cliente-cpf">CPF/CNPJ</label><input type="text" id="cliente-cpf" placeholder="000.000.000-00"></div>
+                            <div class="form-group"><label for="cliente-telefone">Telefone</label><input type="tel" id="cliente-telefone" placeholder="(00) 00000-0000"></div>
+                        </div>
+                    </div>
+                    <div class="form-section">
+                        <h3 class="form-section-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Dados da Transação</h3>
+                        <div class="form-grid">
+                            <div class="form-group"><label for="transacao-id">ID da Transação (Pagar.me)</label><input type="text" id="transacao-id" placeholder="tran_xxxxxxxxxxxxxxxx"></div>
+                            <div class="form-group"><label for="transacao-valor">Valor (R$)</label><input type="number" id="transacao-valor" placeholder="0,00" step="0.01"></div>
+                            <div class="form-group"><label for="transacao-data">Data da Transação</label><input type="date" id="transacao-data"></div>
+                            <div class="form-group"><label for="transacao-bandeira">Bandeira do Cartão</label><select id="transacao-bandeira"><option value="">Selecione...</option><option value="visa">Visa</option><option value="mastercard">Mastercard</option><option value="elo">Elo</option><option value="amex">American Express</option><option value="hipercard">Hipercard</option></select></div>
+                        </div>
+                    </div>
+                    <div class="form-section">
+                        <h3 class="form-section-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Detalhes do Chargeback</h3>
+                        <div class="form-grid">
+                            <div class="form-group"><label for="cb-motivo">Motivo do Chargeback</label><select id="cb-motivo"><option value="">Selecione o motivo...</option><option value="fraude">Fraude / Transação não reconhecida</option><option value="produto-nao-recebido">Produto não recebido</option><option value="produto-diferente">Produto diferente do descrito</option><option value="cobranca-duplicada">Cobrança duplicada</option><option value="cancelamento">Cancelamento não processado</option><option value="valor-incorreto">Valor incorreto</option><option value="servico-nao-prestado">Serviço não prestado</option><option value="outros">Outros</option></select></div>
+                            <div class="form-group"><label for="cb-codigo">Código do Motivo (Reason Code)</label><input type="text" id="cb-codigo" placeholder="Ex: 4853, 10.4"></div>
+                            <div class="form-group"><label for="cb-data-recebimento">Data de Recebimento</label><input type="date" id="cb-data-recebimento"></div>
+                            <div class="form-group"><label for="cb-prazo">Prazo para Resposta</label><input type="date" id="cb-prazo"></div>
+                            <div class="form-group full-width"><label for="cb-descricao">Descrição / Observações</label><textarea id="cb-descricao" rows="4" placeholder="Descreva os detalhes do chargeback..."></textarea></div>
+                        </div>
+                    </div>
+                    <div class="form-section">
+                        <h3 class="form-section-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>Evidências</h3>
+                        <div class="upload-area" id="upload-area">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            <p>Arraste e solte arquivos aqui ou <span class="upload-link">clique para selecionar</span></p>
+                            <span class="upload-hint">Comprovantes, notas fiscais, provas de entrega, etc. (PDF, PNG, JPG até 10MB)</span>
+                            <input type="file" id="file-input" multiple accept=".pdf,.png,.jpg,.jpeg" hidden>
+                        </div>
+                        <div class="uploaded-files" id="uploaded-files"></div>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-secondary" id="btn-limpar">Limpar Formulário</button>
+                        <button class="btn btn-primary" id="btn-registrar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Registrar Chargeback</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Page: Gestão de Casos -->
+        <section class="page" id="page-casos">
+            <div class="cases-controls">
+                <div class="filter-group"><div class="filter-chips">
+                    <button class="chip active" data-filter="todos" id="filter-todos">Todos</button>
+                    <button class="chip" data-filter="recebido" id="filter-recebido"><span class="chip-dot recebido"></span>Recebido</button>
+                    <button class="chip" data-filter="em-analise" id="filter-analise"><span class="chip-dot em-analise"></span>Em Análise</button>
+                    <button class="chip" data-filter="em-disputa" id="filter-disputa"><span class="chip-dot em-disputa"></span>Em Disputa</button>
+                    <button class="chip" data-filter="ganho" id="filter-ganho"><span class="chip-dot ganho"></span>Ganho</button>
+                    <button class="chip" data-filter="perdido" id="filter-perdido"><span class="chip-dot perdido"></span>Perdido</button>
+                </div></div>
+                <div class="cases-actions"><button class="btn btn-outline" id="btn-exportar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Exportar CSV</button></div>
+            </div>
+            <div class="cases-table-container full-table"><table class="cases-table"><thead><tr><th><input type="checkbox" id="select-all"></th><th>ID</th><th>Cliente</th><th>Valor</th><th>Motivo</th><th>Bandeira</th><th>Status</th><th>Provas</th><th>Prazo</th><th>Ações</th></tr></thead><tbody id="cases-table-body"></tbody></table></div>
+        </section>
+
+        <!-- Page: Fluxo Automatizado -->
+        <section class="page" id="page-fluxo">
+            <div class="flow-description"><div class="flow-info-card"><h3>⚡ Fluxo Automatizado de Processamento via Pagar.me</h3><p>Pipeline integrado com Pagar.me: registro → coleta de provas → geração de carta de defesa → envio da disputa → acompanhamento. Cada etapa possui automações e checklist obrigatório.</p></div></div>
+            <div class="flow-pipeline">
+                <div class="flow-stage" id="stage-recebido"><div class="stage-header"><div class="stage-icon recebido"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div><div class="stage-info"><h4>1. Recebido</h4><span class="stage-count" id="stage-count-recebido">0 casos</span></div></div><div class="stage-description"><p>Chargeback registrado. Prazo calculado automaticamente.</p><ul class="stage-actions-list"><li>✅ Registro automático</li><li>✅ Busca dados no Pagar.me</li><li>✅ Cálculo de prazo</li></ul></div><div class="stage-cases" id="stage-cases-recebido"></div></div>
+                <div class="flow-connector"><div class="connector-line"></div><div class="connector-arrow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+                <div class="flow-stage" id="stage-analise"><div class="stage-header"><div class="stage-icon em-analise"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><div class="stage-info"><h4>2. Coleta de Provas</h4><span class="stage-count" id="stage-count-analise">0 casos</span></div></div><div class="stage-description"><p>Checklist de provas obrigatórias conforme motivo.</p><ul class="stage-actions-list"><li>✅ Checklist de evidências</li><li>✅ Modelo de documentação</li><li>✅ Validação automática</li></ul></div><div class="stage-cases" id="stage-cases-analise"></div></div>
+                <div class="flow-connector"><div class="connector-line"></div><div class="connector-arrow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+                <div class="flow-stage" id="stage-disputa"><div class="stage-header"><div class="stage-icon em-disputa"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="stage-info"><h4>3. Defesa Pagar.me</h4><span class="stage-count" id="stage-count-disputa">0 casos</span></div></div><div class="stage-description"><p>Carta de defesa gerada e enviada via Pagar.me.</p><ul class="stage-actions-list"><li>✅ Carta de defesa auto</li><li>✅ Envio via API Pagar.me</li><li>✅ Alertas de prazo</li></ul></div><div class="stage-cases" id="stage-cases-disputa"></div></div>
+                <div class="flow-connector"><div class="connector-line"></div><div class="connector-arrow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+                <div class="flow-stage" id="stage-resolucao"><div class="stage-header"><div class="stage-icon ganho"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div class="stage-info"><h4>4. Resolução</h4><span class="stage-count" id="stage-count-resolucao">0 casos</span></div></div><div class="stage-description"><p>Resultado final: ganho ou perdido.</p><ul class="stage-actions-list"><li>✅ Registro do resultado</li><li>✅ Atualização financeira</li><li>✅ Relatório final</li></ul></div><div class="stage-cases" id="stage-cases-resolucao"></div></div>
+            </div>
+        </section>
+
+        <!-- Page: Defesa Pagar.me -->
+        <section class="page" id="page-defesa">
+            <div class="defesa-grid">
+                <div class="defesa-panel-left">
+                    <div class="defesa-select-card">
+                        <h3>📋 Selecionar Caso para Defesa</h3>
+                        <p>Selecione um chargeback para gerar a carta de defesa automaticamente.</p>
+                        <select id="defesa-caso-select" class="defesa-select"><option value="">Selecione um caso...</option></select>
+                    </div>
+                    <div class="checklist-card" id="checklist-card" style="display:none;">
+                        <div class="checklist-header">
+                            <h3>📎 Checklist de Provas Obrigatórias</h3>
+                            <div class="checklist-progress"><span id="checklist-done">0</span>/<span id="checklist-total">0</span> completas</div>
+                        </div>
+                        <div class="checklist-bar"><div class="checklist-bar-fill" id="checklist-bar-fill" style="width:0%"></div></div>
+                        <div id="checklist-items" class="checklist-items"></div>
+                        <div class="checklist-upload-section">
+                            <h4>Anexar Provas</h4>
+                            <div class="upload-area small" id="defesa-upload-area">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                <p>Anexar evidências <span class="upload-link">clique aqui</span></p>
+                                <input type="file" id="defesa-file-input" multiple accept=".pdf,.png,.jpg,.jpeg" hidden>
+                            </div>
+                            <div class="uploaded-files" id="defesa-uploaded-files"></div>
+                        </div>
+                    </div>
+                    <div class="pagarme-send-card" id="pagarme-send-card" style="display:none;">
+                        <h3>🚀 Enviar Defesa via Pagar.me</h3>
+                        <div class="pagarme-info-row"><span class="pagarme-label">Endpoint:</span><code>POST /chargebacks/{id}/contest</code></div>
+                        <div class="pagarme-info-row"><span class="pagarme-label">Status API:</span><span class="pagarme-api-status" id="pagarme-api-status">● Conectado</span></div>
+                        <div class="pagarme-info-row"><span class="pagarme-label">Documentos:</span><span id="pagarme-docs-count">0 anexos</span></div>
+                        <button class="btn btn-primary btn-lg" id="btn-enviar-pagarme" disabled>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                            Enviar Defesa ao Pagar.me
+                        </button>
+                        <p class="pagarme-hint">A defesa será enviada com a carta e todas as provas anexadas.</p>
+                    </div>
+                </div>
+                <div class="defesa-panel-right">
+                    <div class="carta-defesa-card" id="carta-defesa-card" style="display:none;">
+                        <div class="carta-header">
+                            <h3>📄 Carta de Defesa — Preview</h3>
+                            <div class="carta-actions">
+                                <button class="btn btn-outline btn-sm" id="btn-copiar-carta"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copiar</button>
+                                <button class="btn btn-outline btn-sm" id="btn-download-carta"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download .txt</button>
+                                <button class="btn btn-primary btn-sm" id="btn-gerar-carta">⚡ Regerar Carta</button>
+                            </div>
+                        </div>
+                        <div class="carta-body" id="carta-body" contenteditable="true"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Page: Configurações -->
+        <section class="page" id="page-config">
+            <div class="config-container">
+                <div class="config-card">
+                    <div class="config-section">
+                        <h3 class="form-section-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Integração Pagar.me</h3>
+                        <div class="integration-status-banner" id="integration-banner">
+                            <div class="integration-icon">🔌</div>
+                            <div class="integration-info"><strong>Status da Integração</strong><p id="integration-status-text">Desconectado — Configure sua API Key abaixo</p></div>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group"><label for="config-api-key">API Key (sk_live ou sk_test)</label><input type="password" id="config-api-key" placeholder="sk_live_xxxxxxxxxxxxxxxx"></div>
+                            <div class="form-group"><label for="config-ambiente">Ambiente</label><select id="config-ambiente"><option value="test">Test (Sandbox)</option><option value="live">Live (Produção)</option></select></div>
+                            <div class="form-group full-width">
+                                <button class="btn btn-primary" id="btn-testar-conexao"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Testar Conexão</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="config-section">
+                        <h3 class="form-section-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Modelo de Documentação (Carta de Defesa)</h3>
+                        <div class="form-grid">
+                            <div class="form-group"><label for="config-empresa">Nome da Empresa</label><input type="text" id="config-empresa" placeholder="Sua Empresa Ltda"></div>
+                            <div class="form-group"><label for="config-cnpj">CNPJ</label><input type="text" id="config-cnpj" placeholder="00.000.000/0001-00"></div>
+                            <div class="form-group"><label for="config-responsavel">Responsável pela Defesa</label><input type="text" id="config-responsavel" placeholder="Nome do responsável"></div>
+                            <div class="form-group"><label for="config-email-empresa">E-mail da Empresa</label><input type="email" id="config-email-empresa" placeholder="financeiro@empresa.com"></div>
+                            <div class="form-group full-width"><label for="config-endereco">Endereço Completo</label><input type="text" id="config-endereco" placeholder="Rua, Número, Bairro, Cidade - UF, CEP"></div>
+                            <div class="form-group full-width"><label for="config-texto-extra">Texto Adicional para Carta de Defesa</label><textarea id="config-texto-extra" rows="3" placeholder="Texto complementar que será incluído em todas as cartas de defesa..."></textarea></div>
+                        </div>
+                    </div>
+                    <div class="config-section">
+                        <h3 class="form-section-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Automações</h3>
+                        <div class="automation-toggles">
+                            <label class="toggle-item"><input type="checkbox" id="auto-analise" checked><span class="toggle-slider"></span><div class="toggle-info"><strong>Auto-mover para Análise</strong><p>Mover automaticamente novos chargebacks para "Coleta de Provas"</p></div></label>
+                            <label class="toggle-item"><input type="checkbox" id="auto-carta" checked><span class="toggle-slider"></span><div class="toggle-info"><strong>Auto-gerar Carta de Defesa</strong><p>Gerar carta de defesa automaticamente quando provas estiverem completas</p></div></label>
+                            <label class="toggle-item"><input type="checkbox" id="auto-alerta-prazo" checked><span class="toggle-slider"></span><div class="toggle-info"><strong>Alertas de Prazo</strong><p>Enviar alertas quando faltarem 3 dias para o vencimento</p></div></label>
+                            <label class="toggle-item"><input type="checkbox" id="auto-envio-pagarme"><span class="toggle-slider"></span><div class="toggle-info"><strong>Auto-envio Pagar.me</strong><p>Enviar defesa automaticamente quando todas as provas e carta estiverem prontas</p></div></label>
+                        </div>
+                    </div>
+                    <div class="form-actions"><button class="btn btn-primary" id="btn-salvar-config"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>Salvar Configurações</button></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Page: Relatórios -->
+        <section class="page" id="page-relatorios">
+            <div class="reports-grid">
+                <div class="report-card wide"><div class="chart-header"><h3>Resumo Mensal</h3></div><canvas id="monthly-chart" width="800" height="280"></canvas></div>
+                <div class="report-card"><div class="chart-header"><h3>Distribuição por Status</h3></div><canvas id="status-chart" width="350" height="280"></canvas></div>
+                <div class="report-card"><div class="chart-header"><h3>Chargebacks por Bandeira</h3></div><canvas id="bandeira-chart" width="350" height="280"></canvas></div>
+                <div class="report-card wide" id="report-kpis"><div class="chart-header"><h3>Indicadores de Performance (KPIs)</h3></div>
+                    <div class="kpis-grid">
+                        <div class="kpi-item"><div class="kpi-ring"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" fill="none" stroke="#1e1e2e" stroke-width="10"/><circle cx="60" cy="60" r="52" fill="none" stroke="url(#kpiGrad1)" stroke-width="10" stroke-dasharray="326.73" stroke-dashoffset="326.73" stroke-linecap="round" transform="rotate(-90 60 60)" class="kpi-progress" id="kpi-progress-taxa"/><defs><linearGradient id="kpiGrad1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#6366f1"/><stop offset="100%" stop-color="#8b5cf6"/></linearGradient></defs></svg><span class="kpi-ring-value" id="kpi-value-taxa">0%</span></div><span class="kpi-label">Taxa de Recuperação</span></div>
+                        <div class="kpi-item"><div class="kpi-ring"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" fill="none" stroke="#1e1e2e" stroke-width="10"/><circle cx="60" cy="60" r="52" fill="none" stroke="url(#kpiGrad2)" stroke-width="10" stroke-dasharray="326.73" stroke-dashoffset="326.73" stroke-linecap="round" transform="rotate(-90 60 60)" class="kpi-progress" id="kpi-progress-prazo"/><defs><linearGradient id="kpiGrad2" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#10b981"/><stop offset="100%" stop-color="#34d399"/></linearGradient></defs></svg><span class="kpi-ring-value" id="kpi-value-prazo">0%</span></div><span class="kpi-label">Dentro do Prazo</span></div>
+                        <div class="kpi-item"><div class="kpi-ring"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" fill="none" stroke="#1e1e2e" stroke-width="10"/><circle cx="60" cy="60" r="52" fill="none" stroke="url(#kpiGrad3)" stroke-width="10" stroke-dasharray="326.73" stroke-dashoffset="326.73" stroke-linecap="round" transform="rotate(-90 60 60)" class="kpi-progress" id="kpi-progress-tempo"/><defs><linearGradient id="kpiGrad3" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#fbbf24"/></linearGradient></defs></svg><span class="kpi-ring-value" id="kpi-value-tempo">0d</span></div><span class="kpi-label">Tempo Médio Resolução</span></div>
+                        <div class="kpi-item"><div class="kpi-ring"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" fill="none" stroke="#1e1e2e" stroke-width="10"/><circle cx="60" cy="60" r="52" fill="none" stroke="url(#kpiGrad4)" stroke-width="10" stroke-dasharray="326.73" stroke-dashoffset="326.73" stroke-linecap="round" transform="rotate(-90 60 60)" class="kpi-progress" id="kpi-progress-volume"/><defs><linearGradient id="kpiGrad4" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ef4444"/><stop offset="100%" stop-color="#f87171"/></linearGradient></defs></svg><span class="kpi-ring-value" id="kpi-value-volume">0</span></div><span class="kpi-label">Volume Mensal</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="modal-overlay" id="modal-overlay"><div class="modal" id="detail-modal"><div class="modal-header"><h3 id="modal-title">Detalhes do Chargeback</h3><button class="modal-close" id="modal-close"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div><div class="modal-body" id="modal-body"></div><div class="modal-footer" id="modal-footer"></div></div></div>
+    <div class="notification-panel" id="notification-panel"><div class="notification-panel-header"><h3>Notificações</h3><button class="btn-link" id="notification-clear">Limpar todas</button></div><div class="notification-list" id="notification-list"></div></div>
+    <div class="toast-container" id="toast-container"></div>
+    <script src="app.js"></script>
+    <script src="pagarme.js"></script>
+</body>
+</html>
