@@ -220,39 +220,6 @@ Sistema completo de automação e gestão de chargebacks com fluxo automatizado,
 | [app.js](file:///c:/Users/Vinicius/Documents/automacao%20teste/app.js) | Toda a lógica de automação e interatividade |
 
 ---
-
-## 🖥️ Páginas do Sistema
-
-````carousel
-### 1. Dashboard
-![Dashboard do ChargeGuard](C:/Users/Vinicius/.gemini/antigravity/brain/d1a7366f-8b5c-40fb-9cfe-7713df475677/dashboard_view_1773326401591.png)
-
-Visão geral com métricas em tempo real: Total de Chargebacks, Em Disputa, Valor Recuperado e Taxa de Sucesso. Inclui gráfico de tendência e donut chart de motivos.
-<!-- slide -->
-### 2. Novo Chargeback
-![Formulário de Novo Chargeback](C:/Users/Vinicius/.gemini/antigravity/brain/d1a7366f-8b5c-40fb-9cfe-7713df475677/novo_chargeback_view_1773326412408.png)
-
-Formulário completo com seções para: Dados do Cliente, Dados da Transação, Detalhes do Chargeback e upload de Evidências.
-<!-- slide -->
-### 3. Gestão de Casos
-![Gestão de Casos](C:/Users/Vinicius/.gemini/antigravity/brain/d1a7366f-8b5c-40fb-9cfe-7713df475677/gestao_casos_view_1773326424749.png)
-
-Tabela interativa com filtros por status (Recebido, Em Análise, Em Disputa, Ganho, Perdido), busca e exportação CSV.
-<!-- slide -->
-### 4. Fluxo Automatizado
-![Fluxo Automatizado](C:/Users/Vinicius/.gemini/antigravity/brain/d1a7366f-8b5c-40fb-9cfe-7713df475677/fluxo_automatizado_view_1773326462664.png)
-
-Pipeline visual estilo Kanban com 4 etapas: Recebido → Em Análise → Em Disputa → Resolução. Cada caso pode ser visualizado e avançado.
-<!-- slide -->
-### 5. Relatórios
-![Relatórios](C:/Users/Vinicius/.gemini/antigravity/brain/d1a7366f-8b5c-40fb-9cfe-7713df475677/relatorios_view_1773326477890.png)
-
-Gráficos detalhados: Resumo Mensal (barras), Distribuição por Status (donut), Chargebacks por Bandeira (barras horizontais) e KPIs com indicadores circulares.
-````
->>>>>>> bc4ac60ce64b0c4b4475b0ba35d33dab0cd43698
-
----
-
 ## 🔄 Fluxo de Automação
 
 
