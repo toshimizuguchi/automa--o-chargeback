@@ -76,7 +76,7 @@ const EXTRA_PAGES = {
 };
 
 // Patch navigation
-const origNavigate = window.navigateToPage || function(){};
+const origNavigate = window.navigateToPage || function () { };
 window.addEventListener('DOMContentLoaded', () => {
     // Re-bind nav items for new pages
     document.querySelectorAll('.nav-item').forEach(item => {
@@ -113,14 +113,17 @@ window.addEventListener('DOMContentLoaded', () => {
 function initDefesaPage() {
     const select = document.getElementById('defesa-caso-select');
     if (!select) return;
-    const activeCases = chargebacks.filter(c => !['ganho','perdido'].includes(c.status));
+    const activeCases = chargebacks.filter(c => !['ganho', 'perdido'].includes(c.status));
     select.innerHTML = '<option value="">Selecione um caso...</option>' +
-        activeCases.map(c => `<option value="${c.id}">${c.id} — ${c.cliente.nome} — R$ ${c.transacao.valor.toLocaleString('pt-BR',{minimumFractionDigits:2})} (${MOTIVOS_MAP[c.motivo]})</option>`).join('');
+        activeCases.map(c => `<option value="${c.id}">${c.id} — ${c.cliente.nome} — R$ ${c.transacao.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (${MOTIVOS_MAP[c.motivo]})</option>`).join('');
     select.onchange = () => {
-        selectedDefesaCaseId = select.value;
-        if (selectedDefesaCaseId) {
-            showDefesaPanels(selectedDefesaCaseId);
-        } else {
+    selectedDefesaCaseId = select.value;
+    if (selectedDefesaCaseId) {
+        // Limpa anexos do caso anterior ao trocar
+        defesaFiles = [];
+        renderDefesaFiles();
+        showDefesaPanels(selectedDefesaCaseId);
+    } else {
             document.getElementById('checklist-card').style.display = 'none';
             document.getElementById('pagarme-send-card').style.display = 'none';
             document.getElementById('carta-defesa-card').style.display = 'none';
@@ -136,7 +139,7 @@ function showDefesaPanels(caseId) {
     document.getElementById('carta-defesa-card').style.display = 'block';
     if (!checklistStates[caseId]) {
         const items = PROOF_CHECKLISTS[cb.motivo] || PROOF_CHECKLISTS['outros'];
-        checklistStates[caseId] = items.map(i => ({...i, checked: false}));
+        checklistStates[caseId] = items.map(i => ({ ...i, checked: false }));
     }
     renderChecklist(caseId);
     generateDefenseLetter(cb);
@@ -150,17 +153,17 @@ function renderChecklist(caseId) {
     const total = items.length;
     document.getElementById('checklist-done').textContent = done;
     document.getElementById('checklist-total').textContent = total;
-    document.getElementById('checklist-bar-fill').style.width = total > 0 ? ((done/total)*100)+'%' : '0%';
+    document.getElementById('checklist-bar-fill').style.width = total > 0 ? ((done / total) * 100) + '%' : '0%';
     container.innerHTML = items.map((item, idx) => `
-        <div class="checklist-item ${item.checked?'checked':''}" onclick="toggleCheckItem('${caseId}',${idx})">
-            <div class="check-icon">${item.checked?'✓':''}</div>
+        <div class="checklist-item ${item.checked ? 'checked' : ''}" onclick="toggleCheckItem('${caseId}',${idx})">
+            <div class="check-icon">${item.checked ? '✓' : ''}</div>
             <span class="check-label">${item.label}</span>
             <span class="check-tag">${item.tag}</span>
         </div>
     `).join('');
     // Store proof completion on the case
     const cb = chargebacks.find(c => c.id === caseId);
-    if (cb) cb.proofComplete = total > 0 ? Math.round((done/total)*100) : 0;
+    if (cb) cb.proofComplete = total > 0 ? Math.round((done / total) * 100) : 0;
 }
 
 function toggleCheckItem(caseId, idx) {
@@ -200,7 +203,7 @@ function generateDefenseLetter(cb) {
     const hoje = new Date().toLocaleDateString('pt-BR');
     const motivo = MOTIVOS_MAP[cb.motivo] || cb.motivo;
     const items = checklistStates[cb.id] || PROOF_CHECKLISTS[cb.motivo] || [];
-    const provasText = items.map((p,i) => `   ${i+1}. ${p.label}`).join('\n');
+    const provasText = items.map((p, i) => `   ${i + 1}. ${p.label}`).join('\n');
 
     const carta = `══════════════════════════════════════════════
    CARTA DE DEFESA — CONTESTAÇÃO DE CHARGEBACK
@@ -226,7 +229,7 @@ Via: Pagar.me — API de Contestação
 
 ID Transação:     ${cb.transacao.id}
 ID Chargeback:    ${cb.id}
-Valor:            R$ ${cb.transacao.valor.toLocaleString('pt-BR',{minimumFractionDigits:2})}
+Valor:            R$ ${cb.transacao.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
 Data Transação:   ${formatDate(cb.transacao.data)}
 Data Chargeback:  ${formatDate(cb.dataRecebimento)}
 Motivo Alegado:   ${motivo}
@@ -248,7 +251,7 @@ Telefone: ${cb.cliente.telefone}
 
 Prezados Senhores,
 
-Vimos por meio desta contestar formalmente o chargeback de ID ${cb.id}, referente à transação ${cb.transacao.id}, no valor de R$ ${cb.transacao.valor.toLocaleString('pt-BR',{minimumFractionDigits:2})}, realizada em ${formatDate(cb.transacao.data)}.
+Vimos por meio desta contestar formalmente o chargeback de ID ${cb.id}, referente à transação ${cb.transacao.id}, no valor de R$ ${cb.transacao.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}, realizada em ${formatDate(cb.transacao.data)}.
 
 ${getDefenseArgument(cb.motivo, cb)}
 
@@ -266,7 +269,7 @@ ${provasText}
    CONCLUSÃO
 ══════════════════════════════════════════════
 
-Diante das evidências apresentadas, solicitamos respeitosamente que este chargeback seja revertido em favor de ${empresa}, restituindo o valor de R$ ${cb.transacao.valor.toLocaleString('pt-BR',{minimumFractionDigits:2})} à nossa conta.
+Diante das evidências apresentadas, solicitamos respeitosamente que este chargeback seja revertido em favor de ${empresa}, restituindo o valor de R$ ${cb.transacao.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} à nossa conta.
 
 Colocamo-nos à disposição para qualquer esclarecimento adicional.
 
@@ -315,26 +318,30 @@ document.getElementById('btn-compilar-pdf')?.addEventListener('click', async () 
     const btn = document.getElementById('btn-compilar-pdf');
     const originalText = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = '⏳ Compilando PDF...';
+    btn.innerHTML = '⏳ Preparando documentos...';
 
     try {
-        if (!window.jspdf) {
-            throw new Error('Biblioteca jsPDF não carregada. Verifique sua conexão.');
-        }
-        await generateFullPDF(cb);
-        showToast('success', `PDF gerado: contestacao_${cb.transacao.id}.pdf`);
+        // Detecção robusta das bibliotecas
+        const jspdfLib = window.jspdf || window.jsPDF;
+        const pdflib = window.PDFLib;
+
+        if (!jspdfLib) throw new Error('Biblioteca jsPDF não carregada. Dê um Ctrl+F5.');
+        if (!pdflib) throw new Error('Biblioteca PDF-Lib não carregada. Dê um Ctrl+F5.');
+
+        await generateFullPDF(cb, jspdfLib, pdflib);
+        showToast('success', `PDF gerado com sucesso!`);
     } catch (err) {
         console.error('Erro ao gerar PDF:', err);
-        showToast('error', `Erro: ${err.message || 'Falha ao compilar PDF'}`);
+        showToast('error', `Erro: ${err.message}`);
     } finally {
         btn.disabled = false;
         btn.innerHTML = originalText;
     }
 });
 
-async function generateFullPDF(cb) {
-    const { PDFDocument, rgb } = window.PDFLib;
-    const { jsPDF } = window.jspdf;
+async function generateFullPDF(cb, jspdfLib, pdflib) {
+    const { PDFDocument, rgb } = pdflib;
+    const jsPDF = jspdfLib.jsPDF || jspdfLib;
     
     // 1. Criar o PDF final (vazio)
     const mergedPdf = await PDFDocument.create();
@@ -418,23 +425,23 @@ function readFileAsDataURL(file) {
 // ============================================
 document.getElementById('btn-copiar-carta')?.addEventListener('click', () => {
     const text = document.getElementById('carta-body')?.textContent || '';
-    navigator.clipboard.writeText(text).then(() => showToast('success','Carta copiada para a área de transferência!'));
+    navigator.clipboard.writeText(text).then(() => showToast('success', 'Carta copiada para a área de transferência!'));
 });
 
 document.getElementById('btn-download-carta')?.addEventListener('click', () => {
     const text = document.getElementById('carta-body')?.textContent || '';
-    const blob = new Blob([text], {type:'text/plain;charset=utf-8'});
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
     const cb = chargebacks.find(c => c.id === selectedDefesaCaseId);
     const fileName = cb ? `carta_defesa_${cb.transacao.id}.txt` : `carta_defesa_${selectedDefesaCaseId}.txt`;
     a.download = fileName;
-    a.click(); showToast('success','Carta de defesa baixada!');
+    a.click(); showToast('success', 'Carta de defesa baixada!');
 });
 
 document.getElementById('btn-gerar-carta')?.addEventListener('click', () => {
     if (selectedDefesaCaseId) {
         const cb = chargebacks.find(c => c.id === selectedDefesaCaseId);
-        if (cb) { generateDefenseLetter(cb); showToast('info','Carta de defesa regenerada!'); }
+        if (cb) { generateDefenseLetter(cb); showToast('info', 'Carta de defesa regenerada!'); }
     }
 });
 
@@ -449,11 +456,13 @@ document.getElementById('btn-enviar-pagarme')?.addEventListener('click', () => {
     btn.disabled = true; btn.innerHTML = '⏳ Enviando via API Pagar.me...';
     setTimeout(() => {
         cb.status = 'em-disputa';
-        cb.pagarmeDisputeId = 'disp_' + Math.random().toString(36).substr(2,16);
+        cb.pagarmeDisputeId = 'disp_' + Math.random().toString(36).substr(2, 16);
         cb.historico.push({ data: new Date(), texto: `Defesa enviada via API Pagar.me (${appConfig.ambiente}). Dispute ID: ${cb.pagarmeDisputeId}` });
         cb.historico.push({ data: new Date(), texto: 'Carta de defesa + evidências anexadas automaticamente.' });
-        notifications.unshift({ id: Date.now(), type:'success', icon:'🚀', title:'Defesa Enviada!',
-            text: `${cb.id} — Defesa enviada via Pagar.me. Dispute: ${cb.pagarmeDisputeId}`, time:'Agora', unread:true });
+        notifications.unshift({
+            id: Date.now(), type: 'success', icon: '🚀', title: 'Defesa Enviada!',
+            text: `${cb.id} — Defesa enviada via Pagar.me. Dispute: ${cb.pagarmeDisputeId}`, time: 'Agora', unread: true
+        });
         updateNotificationBadge();
         showToast('success', `Defesa de ${cb.id} enviada com sucesso via Pagar.me!`);
         btn.innerHTML = '✅ Defesa Enviada com Sucesso!';
@@ -469,11 +478,14 @@ const defInput = document.getElementById('defesa-file-input');
 defUpload?.addEventListener('click', () => defInput?.click());
 defInput?.addEventListener('change', (e) => {
     Array.from(e.target.files).forEach(f => defesaFiles.push(f));
-    renderDefesaFiles(); if (selectedDefesaCaseId) updateSendButton(selectedDefesaCaseId);
+    renderDefesaFiles(); 
+    if (selectedDefesaCaseId) updateSendButton(selectedDefesaCaseId);
+    // Limpa o input para permitir selecionar o mesmo arquivo se for removido e adicionado de novo
+    e.target.value = '';
 });
 function renderDefesaFiles() {
     const c = document.getElementById('defesa-uploaded-files'); if (!c) return;
-    c.innerHTML = defesaFiles.map((f,i) => `<div class="uploaded-file"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>${f.name}</span><button class="remove-file" onclick="defesaFiles.splice(${i},1);renderDefesaFiles();"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>`).join('');
+    c.innerHTML = defesaFiles.map((f, i) => `<div class="uploaded-file"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>${f.name}</span><button class="remove-file" onclick="defesaFiles.splice(${i},1);renderDefesaFiles();"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>`).join('');
 }
 
 // ============================================
@@ -509,7 +521,7 @@ function saveConfig() {
     appConfig.autoAlertaPrazo = document.getElementById('auto-alerta-prazo')?.checked ?? true;
     appConfig.autoEnvioPagarme = document.getElementById('auto-envio-pagarme')?.checked ?? false;
     localStorage.setItem('chargeguard_config', JSON.stringify(appConfig));
-    showToast('success','Configurações salvas com sucesso!');
+    showToast('success', 'Configurações salvas com sucesso!');
     updatePagarmeStatus();
 }
 
@@ -517,12 +529,12 @@ document.getElementById('btn-salvar-config')?.addEventListener('click', saveConf
 
 document.getElementById('btn-testar-conexao')?.addEventListener('click', () => {
     const key = document.getElementById('config-api-key')?.value || '';
-    if (!key || key.length < 10) { showToast('error','Insira uma API Key válida do Pagar.me'); return; }
-    showToast('info','🔄 Testando conexão com Pagar.me...');
+    if (!key || key.length < 10) { showToast('error', 'Insira uma API Key válida do Pagar.me'); return; }
+    showToast('info', '🔄 Testando conexão com Pagar.me...');
     setTimeout(() => {
         appConfig.connected = true; appConfig.apiKey = key;
         localStorage.setItem('chargeguard_config', JSON.stringify(appConfig));
-        showToast('success','✅ Conexão com Pagar.me estabelecida com sucesso!');
+        showToast('success', '✅ Conexão com Pagar.me estabelecida com sucesso!');
         updatePagarmeStatus(); updateIntegrationBanner();
     }, 1500);
 });
@@ -560,7 +572,7 @@ function patchCasesTable() {
     if (!origRender) return;
     // Monkey-patch to add proof indicator
     const origRenderCases = renderCasesTable;
-    window.renderCasesTable = function(filter) {
+    window.renderCasesTable = function (filter) {
         origRenderCases(filter);
         // After rendering, update proof cells (they're already in HTML via the patched column)
     };
@@ -569,7 +581,7 @@ function patchCasesTable() {
 // Override renderCasesTable to include proof column
 const _origRenderCasesTable = typeof renderCasesTable === 'function' ? renderCasesTable : null;
 if (_origRenderCasesTable) {
-    window.renderCasesTable = function(filter) {
+    window.renderCasesTable = function (filter) {
         const currentFilterLocal = filter || currentFilter;
         const tbody = document.getElementById('cases-table-body');
         if (!tbody) return;
@@ -585,16 +597,16 @@ if (_origRenderCasesTable) {
                 <td><input type="checkbox" class="case-checkbox" data-id="${c.id}"></td>
                 <td><span style="color:var(--indigo-400);font-weight:600">${c.id}</span></td>
                 <td><div><span>${c.cliente.nome}</span><br><span style="font-size:0.72rem;color:var(--text-muted)">${c.cliente.email}</span></div></td>
-                <td><strong>R$ ${c.transacao.valor.toLocaleString('pt-BR',{minimumFractionDigits:2})}</strong></td>
-                <td>${MOTIVOS_MAP[c.motivo]||c.motivo}</td>
-                <td>${BANDEIRAS_MAP[c.transacao.bandeira]||c.transacao.bandeira}</td>
+                <td><strong>R$ ${c.transacao.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></td>
+                <td>${MOTIVOS_MAP[c.motivo] || c.motivo}</td>
+                <td>${BANDEIRAS_MAP[c.transacao.bandeira] || c.transacao.bandeira}</td>
                 <td>${getStatusBadge(c.status)}</td>
                 <td><div class="proof-indicator"><div class="proof-bar"><div class="proof-bar-fill ${proofClass}" style="width:${proof}%"></div></div><span class="proof-text">${proof}%</span></div></td>
                 <td>${getPrazoDisplay(c.prazo)}</td>
                 <td><div style="display:flex;gap:6px">
                     <button class="action-btn" onclick="openCaseDetail('${c.id}')" title="Detalhes"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
                     <button class="action-btn defense" onclick="goToDefesa('${c.id}')" title="Defesa Pagar.me"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></button>
-                    ${c.status!=='ganho'&&c.status!=='perdido'?`<button class="action-btn advance" onclick="advanceCase('${c.id}')" title="Avançar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>`:''}
+                    ${c.status !== 'ganho' && c.status !== 'perdido' ? `<button class="action-btn advance" onclick="advanceCase('${c.id}')" title="Avançar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>` : ''}
                 </div></td>
             </tr>`;
         }).join('');
