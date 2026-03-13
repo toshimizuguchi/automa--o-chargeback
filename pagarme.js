@@ -116,17 +116,22 @@ window.addEventListener('DOMContentLoaded', () => {
 function initDefesaPage() {
     const select = document.getElementById('defesa-caso-select');
     if (!select) return;
+    
+    // Carregar perfis de empresas disponíveis
+    renderProfileSelector();
+    
     const activeCases = chargebacks.filter(c => !['ganho', 'perdido'].includes(c.status));
     select.innerHTML = '<option value="">Selecione um caso...</option>' +
         activeCases.map(c => `<option value="${c.id}">${c.id} — ${c.cliente.nome} — R$ ${c.transacao.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (${MOTIVOS_MAP[c.motivo]})</option>`).join('');
+    
     select.onchange = () => {
-    selectedDefesaCaseId = select.value;
-    if (selectedDefesaCaseId) {
-        // Limpa anexos do caso anterior ao trocar
-        defesaFiles = [];
-        renderDefesaFiles();
-        showDefesaPanels(selectedDefesaCaseId);
-    } else {
+        selectedDefesaCaseId = select.value;
+        if (selectedDefesaCaseId) {
+            // Limpa anexos do caso anterior ao trocar
+            defesaFiles = [];
+            renderDefesaFiles();
+            showDefesaPanels(selectedDefesaCaseId);
+        } else {
             document.getElementById('checklist-card').style.display = 'none';
             document.getElementById('pagarme-send-card').style.display = 'none';
             document.getElementById('carta-defesa-card').style.display = 'none';
