@@ -307,11 +307,19 @@ function getDefenseArgument(motivo, cb) {
 // ============================================
 // PDF COMPILATION LOGIC
 // ============================================
-document.getElementById('btn-compilar-pdf')?.addEventListener('click', async () => {
+document.getElementById('btn-compilar-pdf')?.addEventListener('click', async (e) => {
+    // Evita propagação e execuções múltiplas
+    e.preventDefault();
+    e.stopPropagation();
+    
     if (!selectedDefesaCaseId) {
         showToast('error', 'Selecione um caso primeiro');
         return;
     }
+    
+    if (this._isCompiling) return;
+    this._isCompiling = true;
+
     const cb = chargebacks.find(c => c.id === selectedDefesaCaseId);
     if (!cb) return;
 
@@ -321,14 +329,14 @@ document.getElementById('btn-compilar-pdf')?.addEventListener('click', async () 
     btn.innerHTML = '⏳ Preparando documentos...';
 
     try {
-        // Detecção robusta das bibliotecas
         const jspdfLib = window.jspdf || window.jsPDF;
         const pdflib = window.PDFLib;
 
         if (!jspdfLib) throw new Error('Biblioteca jsPDF não carregada. Dê um Ctrl+F5.');
         if (!pdflib) throw new Error('Biblioteca PDF-Lib não carregada. Dê um Ctrl+F5.');
 
-        await generateFullPDF(cb, jspdfLib, pdflib);
+        // Passamos uma COPIA da lista de arquivos para garantir isolamento
+        await generateFullPDF(cb, jspdfLib, pdflib, [...defesaFiles]);
         showToast('success', `PDF gerado com sucesso!`);
     } catch (err) {
         console.error('Erro ao gerar PDF:', err);
@@ -336,10 +344,11 @@ document.getElementById('btn-compilar-pdf')?.addEventListener('click', async () 
     } finally {
         btn.disabled = false;
         btn.innerHTML = originalText;
+        this._isCompiling = false;
     }
 });
 
-async function generateFullPDF(cb, jspdfLib, pdflib) {
+async function generateFullPDF(cb, jspdfLib, pdflib, filesToProcess) {
     const { PDFDocument, rgb } = pdflib;
     const jsPDF = jspdfLib.jsPDF || jspdfLib;
     
@@ -364,8 +373,8 @@ async function generateFullPDF(cb, jspdfLib, pdflib) {
     const copiedPages = await mergedPdf.copyPages(tempDoc, tempDoc.getPageIndices());
     copiedPages.forEach(page => mergedPdf.addPage(page));
 
-    // 3. Processar Anexos
-    for (const file of defesaFiles) {
+    // 3. Processar Anexos (Usando a lista ISOLADA passada como argumento)
+    for (const file of filesToProcess) {
         try {
             if (file.type === 'application/pdf') {
                 // Se for PDF, carregar e copiar as páginas
