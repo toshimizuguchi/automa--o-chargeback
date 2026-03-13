@@ -28,13 +28,9 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
                 <span>Dashboard</span>
             </a>
-            <a href="#" class="nav-item" data-page="novo-chargeback" id="nav-novo">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                <span>Central de Eventos</span>
-            </a>
             <a href="#" class="nav-item" data-page="casos" id="nav-casos">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                <span>Gestão de Casos</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><rect x="2" y="2" width="20" height="20" rx="2" ry="2" opacity="0.1"/></svg>
+                <span>Console de Operações</span>
             </a>
             <a href="#" class="nav-item" data-page="fluxo" id="nav-fluxo">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
@@ -108,97 +104,71 @@
         </section>
 
         <!-- Page: Novo Chargeback -->
-        <!-- Page: Central de Eventos (Design Premium) -->
-        <section class="page" id="page-novo-chargeback">
-            <div class="event-hub">
-                <div class="hub-header">
-                    <div class="hub-title">
-                        <h2>Monitor de Gateway</h2>
-                        <p>Fluxo em tempo real de transações e notificações de disputa.</p>
-                    </div>
-                    <div class="hub-connections">
-                        <div class="conn-item active">
-                            <span class="pulse"></span>
-                            <span class="conn-name">Pagar.me API</span>
-                        </div>
-                        <div class="conn-item active">
-                            <span class="pulse"></span>
-                            <span class="conn-name">Databricks Sync</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="hub-stats-grid">
-                    <div class="h-card">
-                        <div class="h-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-                        <div class="h-info"><span class="h-label">Eventos Hoje</span><span class="h-value">142</span></div>
-                    </div>
-                    <div class="h-card">
-                        <div class="h-icon info"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></div>
-                        <div class="h-info"><span class="h-label">Triagens Ativas</span><span class="h-value">8</span></div>
-                    </div>
-                    <div class="h-card">
-                        <div class="h-icon success"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-                        <div class="h-info"><span class="h-label">Doc. Localizados</span><span class="h-value">94%</span></div>
-                    </div>
-                </div>
-
-                <div class="activity-section">
-                    <div class="activity-box">
-                        <div class="activity-header">
-                            <h3>Atividade Recente</h3>
-                            <div class="header-actions">
-                                <button class="btn btn-outline btn-sm" id="btn-sync-api">Sincronizar Databricks</button>
-                                <button class="btn btn-primary btn-sm" onclick="document.getElementById('modal-manual').style.display='flex'">Entrada Manual</button>
-                            </div>
-                        </div>
-                        <div class="activity-list" id="event-activity-list">
-                            <!-- Items elegantes -->
-                            <div class="activity-item highlight">
-                                <span class="time">13:14</span>
-                                <div class="dot alert"></div>
-                                <div class="act-content">
-                                    <strong>C/B Detectado (Pagar.me)</strong>
-                                    <span>Transação <code>TXN_506716</code> identificada. Iniciando enriquecimento de dados via Databricks.</span>
-                                </div>
-                                <div class="act-actions"><button class="btn-link">Ver Caso</button></div>
-                            </div>
-                            <div class="activity-item">
-                                <span class="time">13:10</span>
-                                <div class="dot info"></div>
-                                <div class="act-content">
-                                    <strong>Logs Localizados</strong>
-                                    <span>IP: 189.2.xx.xx e Histórico de Acesso recuperados com sucesso para o cliente Vinicius M.</span>
-                                </div>
-                            </div>
-                            <div class="activity-item">
-                                <span class="time">12:45</span>
-                                <div class="dot success"></div>
-                                <div class="act-content">
-                                    <strong>Webhook: Heartbeat</strong>
-                                    <span>Conexão estável com Pagar.me Gateway (Latency: 45ms).</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Page: Gestão de Casos -->
+        <!-- Page: Console de Operações (Casos + Eventos) -->
         <section class="page" id="page-casos">
-            <div class="cases-controls">
-                <div class="filter-group"><div class="filter-chips">
-                    <button class="chip active" data-filter="todos" id="filter-todos">Todos</button>
-                    <button class="chip" data-filter="recebido" id="filter-recebido"><span class="chip-dot recebido"></span>Recebido</button>
-                    <button class="chip" data-filter="em-analise" id="filter-analise"><span class="chip-dot em-analise"></span>Em Análise</button>
-                    <button class="chip" data-filter="em-disputa" id="filter-disputa"><span class="chip-dot em-disputa"></span>Em Disputa</button>
-                    <button class="chip" data-filter="ganho" id="filter-ganho"><span class="chip-dot ganho"></span>Ganho</button>
-                    <button class="chip" data-filter="perdido" id="filter-perdido"><span class="chip-dot perdido"></span>Perdido</button>
-                </div></div>
-                <div class="cases-actions"><button class="btn btn-outline" id="btn-exportar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Exportar CSV</button></div>
+            <div class="op-console-container">
+                <!-- Top Status Bar -->
+                <div class="op-status-bar">
+                    <div class="op-sync-status">
+                        <div class="conn-dot active"></div>
+                        <span>Pagar.me API: <strong>Ao Vivo</strong></span>
+                        <span class="separator">|</span>
+                        <div class="conn-dot active"></div>
+                        <span>Databricks: <strong>Sincronizado</strong></span>
+                    </div>
+                    <div class="op-actions">
+                        <button class="btn btn-outline btn-sm" id="btn-sync-now">🔄 Forçar Sync</button>
+                        <button class="btn btn-primary btn-sm" onclick="document.getElementById('modal-manual').style.display='flex'">+ Nova Entrada</button>
+                    </div>
+                </div>
+
+                <div class="op-main-grid">
+                    <!-- Left: Cases List -->
+                    <div class="op-cases-panel">
+                        <div class="cases-controls" style="margin-bottom: 15px;">
+                            <div class="filter-group">
+                                <div class="filter-chips">
+                                    <button class="chip active" data-filter="todos" id="filter-todos">Todos</button>
+                                    <button class="chip" data-filter="recebido" id="filter-recebido">Pendentes</button>
+                                    <button class="chip" data-filter="em-analise" id="filter-analise">Coleta</button>
+                                    <button class="chip" data-filter="em-disputa" id="filter-disputa">Disputando</button>
+                                    <button class="chip" data-filter="ganho" id="filter-ganho">Ganhos</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="cases-table-container full-table">
+                            <table class="cases-table">
+                                <thead><tr><th><input type="checkbox" id="select-all"></th><th>ID</th><th>Cliente</th><th>Valor</th><th>Motivo</th><th>Bandeira</th><th>Status</th><th>Provas</th><th>Prazo</th><th>Ações</th></tr></thead>
+                                <tbody id="cases-table-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Right: Activity Feed (Side Panel) -->
+                    <div class="op-activity-panel">
+                        <div class="panel-header">
+                            <h3>Atividade do Sistema</h3>
+                        </div>
+                        <div class="mini-feed" id="event-activity-list">
+                            <!-- Items dinâmicos de automação -->
+                            <div class="mini-feed-item">
+                                <span class="f-time">13:31</span>
+                                <div class="f-content">
+                                    <p><strong>Triagem Concluída</strong></p>
+                                    <span>Logs vinculados ao Caso TXN_506716</span>
+                                </div>
+                            </div>
+                            <div class="mini-feed-item">
+                                <span class="f-time">13:28</span>
+                                <div class="f-content">
+                                    <p><strong>Nova API Key detectada</strong></p>
+                                    <span>Conexão Gateway renovada.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="cases-table-container full-table"><table class="cases-table"><thead><tr><th><input type="checkbox" id="select-all"></th><th>ID</th><th>Cliente</th><th>Valor</th><th>Motivo</th><th>Bandeira</th><th>Status</th><th>Provas</th><th>Prazo</th><th>Ações</th></tr></thead><tbody id="cases-table-body"></tbody></table></div>
         </section>
 
         <!-- Page: Fluxo Automatizado -->

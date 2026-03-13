@@ -2250,9 +2250,50 @@ body {
 .activity-item .time { font-size: 0.75rem; color: var(--text-muted); font-family: monospace; padding-top: 3px; }
 .activity-item .dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 8px; flex-shrink: 0; }
 .dot.alert { background: var(--red-500); box-shadow: 0 0 10px var(--red-500); }
-.dot.info { background: var(--blue-500); }
-.dot.success { background: var(--green-500); }
-.act-content { flex: 1; }
-.act-content strong { display: block; color: var(--white); font-size: 0.9rem; margin-bottom: 3px; }
-.act-content span { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
-.act-actions { flex-shrink: 0; }
+/* Unified Operations Console */
+.op-console-container { display: flex; flex-direction: column; gap: 20px; }
+
+.op-status-bar { 
+    background: rgba(255,255,255,0.03); 
+    border: 1px solid var(--border-color); 
+    padding: 12px 20px; 
+    border-radius: 12px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+}
+.op-sync-status { display: flex; align-items: center; gap: 12px; font-size: 0.85rem; color: var(--text-muted); }
+.conn-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); }
+.conn-dot.active { background: var(--green-500); box-shadow: 0 0 10px var(--green-500); }
+.separator { color: rgba(255,255,255,0.1); }
+
+.op-main-grid { display: grid; grid-template-columns: 1fr 300px; gap: 20px; }
+
+.op-cases-panel { background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; }
+
+.op-activity-panel { 
+    background: rgba(255,255,255,0.03); 
+    border: 1px solid var(--border-color); 
+    border-radius: 16px; 
+    display: flex; 
+    flex-direction: column;
+}
+.op-activity-panel .panel-header { padding: 15px 20px; border-bottom: 1px solid var(--border-color); }
+.op-activity-panel h3 { font-size: 0.9rem; color: var(--white); font-weight: 600; }
+
+.mini-feed { padding: 10px; display: flex; flex-direction: column; gap: 5px; }
+.mini-feed-item { 
+    display: flex; 
+    gap: 12px; 
+    padding: 12px; 
+    border-radius: 8px; 
+    transition: background 0.2s;
+}
+.mini-feed-item:hover { background: rgba(255,255,255,0.03); }
+.f-time { font-size: 0.7rem; color: var(--text-muted); font-family: monospace; padding-top: 2px; }
+.f-content p { font-size: 0.82rem; color: var(--white); margin-bottom: 2px; }
+.f-content span { font-size: 0.75rem; color: var(--text-muted); display: block; line-height: 1.4; }
+
+@media (max-width: 1200px) {
+    .op-main-grid { grid-template-columns: 1fr; }
+}
