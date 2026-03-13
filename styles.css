@@ -2250,13 +2250,12 @@ body {
 .activity-item .time { font-size: 0.75rem; color: var(--text-muted); font-family: monospace; padding-top: 3px; }
 .activity-item .dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 8px; flex-shrink: 0; }
 .dot.alert { background: var(--red-500); box-shadow: 0 0 10px var(--red-500); }
-/* Unified Operations Console - Layout Fix */
+/* Unified Operations Console - Layout Fix Final */
 .op-console-container { 
     display: flex; 
     flex-direction: column; 
     gap: 20px; 
     max-width: 100%;
-    overflow-x: hidden;
 }
 
 .op-status-bar { 
@@ -2270,17 +2269,19 @@ body {
     flex-wrap: wrap;
     gap: 15px;
 }
+
 .op-sync-status { display: flex; align-items: center; gap: 12px; font-size: 0.85rem; color: var(--text-muted); }
 .conn-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); }
 .conn-dot.active { background: var(--green-500); box-shadow: 0 0 10px var(--green-500); }
 .separator { color: rgba(255,255,255,0.1); }
 
-/* Ajustado para 280px e 1fr para evitar corte */
+/* Ajustado para 260px (era 280px) para dar mais espaço */
 .op-main-grid { 
     display: grid; 
-    grid-template-columns: 1fr 280px; 
+    grid-template-columns: 1fr 260px; 
     gap: 20px; 
     align-items: start;
+    width: 100%;
 }
 
 .op-cases-panel { 
@@ -2288,7 +2289,7 @@ body {
     border: 1px solid var(--border-color); 
     border-radius: 16px; 
     padding: 20px;
-    min-width: 0; /* Permite que o grid encolha o que for necessário */
+    min-width: 0;
 }
 
 .op-activity-panel { 
@@ -2297,9 +2298,11 @@ body {
     border-radius: 16px; 
     display: flex; 
     flex-direction: column;
-    min-width: 0;
+    min-width: 0; 
     overflow: hidden;
+    margin-right: 5px; /* Margem extra de segurança */
 }
+
 .op-activity-panel .panel-header { padding: 15px 20px; border-bottom: 1px solid var(--border-color); }
 .op-activity-panel h3 { font-size: 0.9rem; color: var(--white); font-weight: 600; }
 
@@ -2321,9 +2324,10 @@ body {
     color: var(--text-muted); 
     display: block; 
     line-height: 1.4;
-    word-break: break-all; /* Força quebra de IDs longos se necessário */
+    word-break: break-all;
 }
 
 @media (max-width: 1200px) {
-    .op-main-grid { grid-template-columns: 1fr; }
+    .op-main-grid { grid-template-columns: 1fr; margin-right: 0; }
+    .op-activity-panel { margin-right: 0; }
 }
