@@ -255,7 +255,7 @@ Gráficos detalhados: Resumo Mensal (barras), Distribuição por Status (donut),
 
 ## 🔄 Fluxo de Automação
 
-<<<<<<< HEAD
+
 ```
   ┌─────────────┐      ┌─────────────────┐      ┌─────────────────┐      ┌──────────────┐
   │  1. RECEBIDO │─────▶│ 2. COLETA PROVAS │─────▶│ 3. DEFESA       │─────▶│ 4. RESOLUÇÃO │
@@ -409,7 +409,7 @@ graph LR
 
 ---
 
-<<<<<<< HEAD
+
 ## 🤝 Contribuindo
 
 Contribuições são muito bem-vindas! Para contribuir:
@@ -439,7 +439,7 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 <p align="center">
   Feito com ❤️ e ⚡ para automatizar a defesa de chargebacks
 </p>
-=======
+
 ## 🎨 Design & UX
 - **Tema escuro premium** com cores harmoniosas
 - **Tipografia**: Inter (Google Fonts)
