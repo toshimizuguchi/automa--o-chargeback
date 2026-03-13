@@ -211,15 +211,21 @@
                         </div>
                     </div>
                     <div class="pagarme-send-card" id="pagarme-send-card" style="display:none;">
-                        <h3>🚀 Enviar Defesa via Pagar.me</h3>
+                        <h3>📦 Compilar & Enviar Defesa</h3>
                         <div class="pagarme-info-row"><span class="pagarme-label">Endpoint:</span><code>POST /chargebacks/{id}/contest</code></div>
                         <div class="pagarme-info-row"><span class="pagarme-label">Status API:</span><span class="pagarme-api-status" id="pagarme-api-status">● Conectado</span></div>
                         <div class="pagarme-info-row"><span class="pagarme-label">Documentos:</span><span id="pagarme-docs-count">0 anexos</span></div>
-                        <button class="btn btn-primary btn-lg" id="btn-enviar-pagarme" disabled>
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                            Enviar Defesa ao Pagar.me
-                        </button>
-                        <p class="pagarme-hint">A defesa será enviada com a carta e todas as provas anexadas.</p>
+                        <div class="pdf-actions-grid">
+                            <button class="btn btn-success btn-lg" id="btn-compilar-pdf">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                                📄 Compilar PDF Completo
+                            </button>
+                            <button class="btn btn-primary btn-lg" id="btn-enviar-pagarme" disabled>
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                                🚀 Enviar Defesa ao Pagar.me
+                            </button>
+                        </div>
+                        <p class="pagarme-hint">O PDF será gerado com a carta de defesa + todas as provas em ordem, nomeado pelo ID da transação.</p>
                     </div>
                 </div>
                 <div class="defesa-panel-right">
@@ -302,6 +308,7 @@
     <div class="modal-overlay" id="modal-overlay"><div class="modal" id="detail-modal"><div class="modal-header"><h3 id="modal-title">Detalhes do Chargeback</h3><button class="modal-close" id="modal-close"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div><div class="modal-body" id="modal-body"></div><div class="modal-footer" id="modal-footer"></div></div></div>
     <div class="notification-panel" id="notification-panel"><div class="notification-panel-header"><h3>Notificações</h3><button class="btn-link" id="notification-clear">Limpar todas</button></div><div class="notification-list" id="notification-list"></div></div>
     <div class="toast-container" id="toast-container"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
     <script src="app.js"></script>
     <script src="pagarme.js"></script>
 </body>

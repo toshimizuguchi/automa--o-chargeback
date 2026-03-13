@@ -302,6 +302,112 @@ function getDefenseArgument(motivo, cb) {
 }
 
 // ============================================
+// PDF COMPILATION LOGIC
+// ============================================
+document.getElementById('btn-compilar-pdf')?.addEventListener('click', async () => {
+    if (!selectedDefesaCaseId) {
+        showToast('error', 'Selecione um caso primeiro');
+        return;
+    }
+    const cb = chargebacks.find(c => c.id === selectedDefesaCaseId);
+    if (!cb) return;
+
+    const btn = document.getElementById('btn-compilar-pdf');
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Compilando PDF...';
+
+    try {
+        await generateFullPDF(cb);
+        showToast('success', `PDF gerado: contestacao_${cb.transacao.id}.pdf`);
+    } catch (err) {
+        console.error('Erro ao gerar PDF:', err);
+        showToast('error', 'Erro ao gerar PDF completo');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+});
+
+async function generateFullPDF(cb) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const cartaText = document.getElementById('carta-body').textContent;
+    
+    // --- PÁGINA 1: CARTA DE DEFESA ---
+    doc.setFont("courier", "normal");
+    doc.setFontSize(10);
+    
+    // Split text into lines to fit page width
+    const lines = doc.splitTextToSize(cartaText, 180);
+    let y = 20;
+    
+    // Adicionar linhas com quebra de página se necessário
+    lines.forEach(line => {
+        if (y > 280) {
+            doc.addPage();
+            y = 20;
+        }
+        doc.text(line, 15, y);
+        y += 5;
+    });
+
+    // --- PÁGINAS SEGUINTES: PROVAS (IMAGENS) ---
+    for (const file of defesaFiles) {
+        if (file.type.startsWith('image/')) {
+            const imageData = await readFileAsDataURL(file);
+            doc.addPage();
+            
+            // Título simples da evidência
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(12);
+            doc.text(`EVIDÊNCIA: ${file.name}`, 15, 15);
+            
+            // Adicionar imagem redimensionada proporcionalmente
+            try {
+                const imgProps = doc.getImageProperties(imageData);
+                const pdfWidth = doc.internal.pageSize.getWidth() - 30; // Margem de 15 de cada lado
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                
+                // Se a altura for maior que a página, reduzimos para caber
+                let finalWidth = pdfWidth;
+                let finalHeight = pdfHeight;
+                if (finalHeight > 250) {
+                    finalHeight = 250;
+                    finalWidth = (imgProps.width * finalHeight) / imgProps.height;
+                }
+                
+                doc.addImage(imageData, 'JPEG', 15, 25, finalWidth, finalHeight);
+            } catch (e) {
+                console.warn('Erro ao processar imagem:', file.name, e);
+                doc.text('Erro ao carregar prévia desta imagem.', 15, 40);
+            }
+        } else if (file.type === 'application/pdf') {
+            doc.addPage();
+            doc.setFont("helvetica", "bold");
+            doc.text(`EVIDÊNCIA ANEXADA: ${file.name}`, 15, 15);
+            doc.setFont("helvetica", "italic");
+            doc.setFontSize(10);
+            doc.text('(Este arquivo PDF deve ser enviado separadamente via Pagar.me ou mesclado via sistema de documentos).', 15, 25);
+        }
+    }
+
+    // Nomenclatura: contestacao_[transaction_id].pdf
+    const fileName = `contestacao_${cb.transacao.id}.pdf`;
+    doc.save(fileName);
+}
+
+// Helper to read file as data URL
+function readFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
+
+// ============================================
 // CARTA ACTIONS
 // ============================================
 document.getElementById('btn-copiar-carta')?.addEventListener('click', () => {
@@ -313,7 +419,9 @@ document.getElementById('btn-download-carta')?.addEventListener('click', () => {
     const text = document.getElementById('carta-body')?.textContent || '';
     const blob = new Blob([text], {type:'text/plain;charset=utf-8'});
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-    a.download = `carta_defesa_${selectedDefesaCaseId}_${new Date().toISOString().split('T')[0]}.txt`;
+    const cb = chargebacks.find(c => c.id === selectedDefesaCaseId);
+    const fileName = cb ? `carta_defesa_${cb.transacao.id}.txt` : `carta_defesa_${selectedDefesaCaseId}.txt`;
+    a.download = fileName;
     a.click(); showToast('success','Carta de defesa baixada!');
 });
 

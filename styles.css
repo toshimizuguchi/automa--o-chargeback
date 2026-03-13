@@ -2114,3 +2114,77 @@ body {
         position: static;
     }
 }
+
+/* ============================================
+   PDF Compile Section
+   ============================================ */
+.pdf-actions-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 16px 0 8px;
+}
+
+.btn-success {
+    background: var(--gradient-success);
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 12px 20px;
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all var(--transition-fast);
+}
+
+.btn-success:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+}
+
+.btn-success:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.pdf-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 12px 0;
+    display: none;
+}
+
+.pdf-progress-bar.active {
+    display: block;
+}
+
+.pdf-progress-fill {
+    height: 100%;
+    background: var(--gradient-success);
+    border-radius: 4px;
+    width: 0%;
+    transition: width 0.4s ease;
+}
+
+.pdf-status-text {
+    font-size: 0.75rem;
+    color: var(--green-400);
+    font-weight: 500;
+    margin-top: 6px;
+    display: none;
+}
+
+.pdf-status-text.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
