@@ -333,73 +333,74 @@ document.getElementById('btn-compilar-pdf')?.addEventListener('click', async () 
 });
 
 async function generateFullPDF(cb) {
+    const { PDFDocument, rgb } = window.PDFLib;
     const { jsPDF } = window.jspdf;
+    
+    // 1. Criar o PDF final (vazio)
+    const mergedPdf = await PDFDocument.create();
+    
+    // 2. Gerar a Carta de Defesa usando jsPDF e converter para bytes
     const doc = new jsPDF();
     const cartaText = document.getElementById('carta-body').textContent;
-    
-    // --- PÁGINA 1: CARTA DE DEFESA ---
     doc.setFont("courier", "normal");
     doc.setFontSize(10);
-    
-    // Split text into lines to fit page width
     const lines = doc.splitTextToSize(cartaText, 180);
     let y = 20;
-    
-    // Adicionar linhas com quebra de página se necessário
     lines.forEach(line => {
-        if (y > 280) {
-            doc.addPage();
-            y = 20;
-        }
-        doc.text(line, 15, y);
-        y += 5;
+        if (y > 280) { doc.addPage(); y = 20; }
+        doc.text(line, 15, y); y += 5;
     });
+    
+    // Converter jsPDF para ArrayBuffer e carregar no PDF final
+    const cartaBytes = doc.output('arraybuffer');
+    const tempDoc = await PDFDocument.load(cartaBytes);
+    const copiedPages = await mergedPdf.copyPages(tempDoc, tempDoc.getPageIndices());
+    copiedPages.forEach(page => mergedPdf.addPage(page));
 
-    // --- PÁGINAS SEGUINTES: PROVAS (IMAGENS) ---
+    // 3. Processar Anexos
     for (const file of defesaFiles) {
-        if (file.type.startsWith('image/')) {
-            const imageData = await readFileAsDataURL(file);
-            doc.addPage();
-            
-            // Título simples da evidência
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(12);
-            doc.text(`EVIDÊNCIA: ${file.name}`, 15, 15);
-            
-            // Adicionar imagem redimensionada proporcionalmente
-            try {
-                const imgProps = doc.getImageProperties(imageData);
-                const format = file.type.split('/')[1].toUpperCase(); // PNG, JPEG, etc.
-                const pdfWidth = doc.internal.pageSize.getWidth() - 30; // Margem de 15 de cada lado
-                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        try {
+            if (file.type === 'application/pdf') {
+                // Se for PDF, carregar e copiar as páginas
+                const fileBytes = await file.arrayBuffer();
+                const attachmentDoc = await PDFDocument.load(fileBytes);
+                const pages = await mergedPdf.copyPages(attachmentDoc, attachmentDoc.getPageIndices());
+                pages.forEach(page => mergedPdf.addPage(page));
+            } 
+            else if (file.type.startsWith('image/')) {
+                // Se for imagem, criar uma nova página e desenhar
+                const imageData = await file.arrayBuffer();
+                const page = mergedPdf.addPage([595.28, 841.89]); // A4 em pontos
                 
-                // Se a altura for maior que a página, reduzimos para caber
-                let finalWidth = pdfWidth;
-                let finalHeight = pdfHeight;
-                if (finalHeight > 250) {
-                    finalHeight = 250;
-                    finalWidth = (imgProps.width * finalHeight) / imgProps.height;
-                }
+                let image;
+                if (file.type === 'image/png') image = await mergedPdf.embedPng(imageData);
+                else image = await mergedPdf.embedJpg(imageData);
                 
-                // Usa o formato real da imagem
-                doc.addImage(imageData, format === 'PNG' ? 'PNG' : 'JPEG', 15, 25, finalWidth, finalHeight);
-            } catch (e) {
-                console.warn('Erro ao processar imagem:', file.name, e);
-                doc.text(`[Erro ao carregar imagem: ${file.name}]`, 15, 40);
+                const { width, height } = image.scale(1);
+                const dims = image.scale(Math.min(500 / width, 700 / height)); // Redimensionar para caber
+                
+                page.drawText(`EVIDÊNCIA: ${file.name}`, { x: 50, y: 800, size: 12 });
+                page.drawImage(image, {
+                    x: 50,
+                    y: 780 - dims.height,
+                    width: dims.width,
+                    height: dims.height,
+                });
             }
-        } else if (file.type === 'application/pdf') {
-            doc.addPage();
-            doc.setFont("helvetica", "bold");
-            doc.text(`EVIDÊNCIA ANEXADA: ${file.name}`, 15, 15);
-            doc.setFont("helvetica", "italic");
-            doc.setFontSize(10);
-            doc.text('(Este arquivo PDF deve ser enviado separadamente via Pagar.me ou mesclado via sistema de documentos).', 15, 25);
+        } catch (err) {
+            console.warn(`Erro ao processar anexo ${file.name}:`, err);
+            const errorPage = mergedPdf.addPage();
+            errorPage.drawText(`Erro ao incluir anexo: ${file.name}`, { x: 50, y: 700, size: 12, color: rgb(1, 0, 0) });
         }
     }
 
-    // Nomenclatura: contestacao_[transaction_id].pdf
-    const fileName = `contestacao_${cb.transacao.id}.pdf`;
-    doc.save(fileName);
+    // 4. Salvar e Baixar
+    const pdfBytes = await mergedPdf.save();
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `contestacao_${cb.transacao.id}.pdf`;
+    link.click();
 }
 
 // Helper to read file as data URL
