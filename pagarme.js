@@ -4,9 +4,12 @@
 
 // Config store
 let appConfig = JSON.parse(localStorage.getItem('chargeguard_config') || 'null') || {
-    apiKey: '', ambiente: 'test', empresa: '', cnpj: '', responsavel: '', emailEmpresa: '', endereco: '', textoExtra: '',
+    profiles: [],
+    currentProfileId: null,
+    apiKey: '', ambiente: 'test', 
     autoAnalise: true, autoCarta: true, autoAlertaPrazo: true, autoEnvioPagarme: false, connected: false
 };
+let editingProfileId = null;
 
 // Proof checklists by reason
 const PROOF_CHECKLISTS = {
@@ -142,8 +145,22 @@ function showDefesaPanels(caseId) {
         checklistStates[caseId] = items.map(i => ({ ...i, checked: false }));
     }
     renderChecklist(caseId);
+    renderProfileSelector();
     generateDefenseLetter(cb);
     updateSendButton(caseId);
+}
+
+function renderProfileSelector() {
+    const select = document.getElementById('defesa-perfil-select');
+    if (!select) return;
+    const profiles = appConfig.profiles || [];
+    select.innerHTML = '<option value="default">Padrão (Configurações)</option>' +
+        profiles.map(p => `<option value="${p.id}">${p.empresa}</option>`).join('');
+    
+    select.onchange = () => {
+        const cb = chargebacks.find(c => c.id === selectedDefesaCaseId);
+        if (cb) generateDefenseLetter(cb);
+    };
 }
 
 function renderChecklist(caseId) {
@@ -194,7 +211,17 @@ function updateSendButton(caseId) {
 function generateDefenseLetter(cb) {
     const body = document.getElementById('carta-body');
     if (!body) return;
-    const cfg = appConfig;
+    
+    // Pegar dados do perfil selecionado ou do padrão
+    const perfilId = document.getElementById('defesa-perfil-select')?.value;
+    let dados = { ...appConfig };
+    
+    if (perfilId && perfilId !== 'default') {
+        const perfil = appConfig.profiles.find(p => p.id === perfilId);
+        if (perfil) dados = { ...perfil };
+    }
+
+    const cfg = dados;
     const empresa = cfg.empresa || '[NOME DA EMPRESA]';
     const cnpj = cfg.cnpj || '[CNPJ]';
     const resp = cfg.responsavel || '[RESPONSÁVEL]';
@@ -498,40 +525,126 @@ function renderDefesaFiles() {
 }
 
 // ============================================
-// CONFIG PAGE
+// CONFIG PAGE & PROFILES
 // ============================================
 function loadConfig() {
     document.getElementById('config-api-key') && (document.getElementById('config-api-key').value = appConfig.apiKey);
     document.getElementById('config-ambiente') && (document.getElementById('config-ambiente').value = appConfig.ambiente);
-    document.getElementById('config-empresa') && (document.getElementById('config-empresa').value = appConfig.empresa);
-    document.getElementById('config-cnpj') && (document.getElementById('config-cnpj').value = appConfig.cnpj);
-    document.getElementById('config-responsavel') && (document.getElementById('config-responsavel').value = appConfig.responsavel);
-    document.getElementById('config-email-empresa') && (document.getElementById('config-email-empresa').value = appConfig.emailEmpresa);
-    document.getElementById('config-endereco') && (document.getElementById('config-endereco').value = appConfig.endereco);
-    document.getElementById('config-texto-extra') && (document.getElementById('config-texto-extra').value = appConfig.textoExtra);
+    
     document.getElementById('auto-analise') && (document.getElementById('auto-analise').checked = appConfig.autoAnalise);
     document.getElementById('auto-carta') && (document.getElementById('auto-carta').checked = appConfig.autoCarta);
     document.getElementById('auto-alerta-prazo') && (document.getElementById('auto-alerta-prazo').checked = appConfig.autoAlertaPrazo);
     document.getElementById('auto-envio-pagarme') && (document.getElementById('auto-envio-pagarme').checked = appConfig.autoEnvioPagarme);
+    
+    renderProfilesList();
     updateIntegrationBanner();
 }
 
+function renderProfilesList() {
+    const list = document.getElementById('profiles-list');
+    if (!list) return;
+    
+    const profiles = appConfig.profiles || [];
+    if (profiles.length === 0) {
+        list.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted); text-align:center; padding: 20px;">Nenhum perfil cadastrado. Adicione sua primeira empresa abaixo.</p>';
+        return;
+    }
+    
+    list.innerHTML = profiles.map(p => `
+        <div class="profile-card-item">
+            <div class="profile-card-info">
+                <h4>${p.empresa}</h4>
+                <p>${p.cnpj} — ${p.responsavel}</p>
+            </div>
+            <div class="profile-card-actions">
+                <button class="btn-icon" onclick="editProfile('${p.id}')" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                <button class="btn-icon delete" onclick="deleteProfile('${p.id}')" title="Excluir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function editProfile(id) {
+    const profile = appConfig.profiles.find(p => p.id === id);
+    if (!profile) return;
+    
+    editingProfileId = id;
+    document.getElementById('profile-editor-section').style.display = 'block';
+    
+    document.getElementById('config-empresa').value = profile.empresa;
+    document.getElementById('config-cnpj').value = profile.cnpj;
+    document.getElementById('config-responsavel').value = profile.responsavel;
+    document.getElementById('config-email-empresa').value = profile.emailEmpresa;
+    document.getElementById('config-endereco').value = profile.endereco;
+    document.getElementById('config-texto-extra').value = profile.textoExtra;
+    
+    document.getElementById('profile-editor-section').scrollIntoView({ behavior: 'smooth' });
+}
+
+function deleteProfile(id) {
+    if (confirm('Tem certeza que deseja excluir este perfil de empresa?')) {
+        appConfig.profiles = appConfig.profiles.filter(p => p.id !== id);
+        saveConfigToStore();
+        renderProfilesList();
+        showToast('info', 'Perfil excluído');
+    }
+}
+
+document.getElementById('btn-novo-perfil')?.addEventListener('click', () => {
+    editingProfileId = 'new_' + Date.now();
+    document.getElementById('profile-editor-section').style.display = 'block';
+    
+    // Limpa campos
+    document.getElementById('config-empresa').value = '';
+    document.getElementById('config-cnpj').value = '';
+    document.getElementById('config-responsavel').value = '';
+    document.getElementById('config-email-empresa').value = '';
+    document.getElementById('config-endereco').value = '';
+    document.getElementById('config-texto-extra').value = '';
+    
+    document.getElementById('profile-editor-section').scrollIntoView({ behavior: 'smooth' });
+});
+
 function saveConfig() {
+    // API Keys e Globais
     appConfig.apiKey = document.getElementById('config-api-key')?.value || '';
     appConfig.ambiente = document.getElementById('config-ambiente')?.value || 'test';
-    appConfig.empresa = document.getElementById('config-empresa')?.value || '';
-    appConfig.cnpj = document.getElementById('config-cnpj')?.value || '';
-    appConfig.responsavel = document.getElementById('config-responsavel')?.value || '';
-    appConfig.emailEmpresa = document.getElementById('config-email-empresa')?.value || '';
-    appConfig.endereco = document.getElementById('config-endereco')?.value || '';
-    appConfig.textoExtra = document.getElementById('config-texto-extra')?.value || '';
     appConfig.autoAnalise = document.getElementById('auto-analise')?.checked ?? true;
     appConfig.autoCarta = document.getElementById('auto-carta')?.checked ?? true;
     appConfig.autoAlertaPrazo = document.getElementById('auto-alerta-prazo')?.checked ?? true;
     appConfig.autoEnvioPagarme = document.getElementById('auto-envio-pagarme')?.checked ?? false;
-    localStorage.setItem('chargeguard_config', JSON.stringify(appConfig));
-    showToast('success', 'Configurações salvas com sucesso!');
+
+    // Se estiver editando um perfil
+    if (editingProfileId) {
+        const profileData = {
+            id: editingProfileId.startsWith('new_') ? 'prof_' + Date.now() : editingProfileId,
+            empresa: document.getElementById('config-empresa').value,
+            cnpj: document.getElementById('config-cnpj').value,
+            responsavel: document.getElementById('config-responsavel').value,
+            emailEmpresa: document.getElementById('config-email-empresa').value,
+            endereco: document.getElementById('config-endereco').value,
+            textoExtra: document.getElementById('config-texto-extra').value
+        };
+
+        if (editingProfileId.startsWith('new_')) {
+            appConfig.profiles.push(profileData);
+        } else {
+            const idx = appConfig.profiles.findIndex(p => p.id === editingProfileId);
+            if (idx !== -1) appConfig.profiles[idx] = profileData;
+        }
+        
+        editingProfileId = null;
+        document.getElementById('profile-editor-section').style.display = 'none';
+    }
+
+    saveConfigToStore();
+    showToast('success', 'Configurações e Perfis salvos!');
+    renderProfilesList();
     updatePagarmeStatus();
+}
+
+function saveConfigToStore() {
+    localStorage.setItem('chargeguard_config', JSON.stringify(appConfig));
 }
 
 document.getElementById('btn-salvar-config')?.addEventListener('click', saveConfig);
@@ -542,7 +655,7 @@ document.getElementById('btn-testar-conexao')?.addEventListener('click', () => {
     showToast('info', '🔄 Testando conexão com Pagar.me...');
     setTimeout(() => {
         appConfig.connected = true; appConfig.apiKey = key;
-        localStorage.setItem('chargeguard_config', JSON.stringify(appConfig));
+        saveConfigToStore();
         showToast('success', '✅ Conexão com Pagar.me estabelecida com sucesso!');
         updatePagarmeStatus(); updateIntegrationBanner();
     }, 1500);
@@ -579,15 +692,12 @@ function updateIntegrationBanner() {
 function patchCasesTable() {
     const origRender = window.renderCasesTable;
     if (!origRender) return;
-    // Monkey-patch to add proof indicator
     const origRenderCases = renderCasesTable;
     window.renderCasesTable = function (filter) {
         origRenderCases(filter);
-        // After rendering, update proof cells (they're already in HTML via the patched column)
     };
 }
 
-// Override renderCasesTable to include proof column
 const _origRenderCasesTable = typeof renderCasesTable === 'function' ? renderCasesTable : null;
 if (_origRenderCasesTable) {
     window.renderCasesTable = function (filter) {

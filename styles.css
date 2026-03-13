@@ -2188,3 +2188,29 @@ body {
     display: block;
     animation: fadeIn 0.3s ease;
 }
+
+/* Profiles & Multi-company styles */
+.defesa-form-row { display: flex; gap: 15px; margin: 15px 0; }
+.defesa-form-field { flex: 1; }
+.defesa-form-field label { display: block; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+
+.profiles-list { display: grid; gap: 10px; margin-top: 15px; }
+.profile-card-item { 
+    background: rgba(255,255,255,0.03); 
+    border: 1px solid var(--border-color); 
+    border-radius: var(--radius-sm); 
+    padding: 14px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    transition: all 0.2s ease;
+}
+.profile-card-item:hover { border-color: var(--indigo-500); background: rgba(99, 102, 241, 0.05); }
+.profile-card-info h4 { font-size: 0.88rem; margin-bottom: 2px; color: var(--white); font-weight: 600; }
+.profile-card-info p { font-size: 0.72rem; color: var(--text-muted); }
+.profile-card-actions { display: flex; gap: 8px; }
+
+.btn-icon { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 6px; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+.btn-icon:hover { background: rgba(255,255,255,0.1); color: var(--white); }
+.btn-icon.delete:hover { color: var(--red-400); background: rgba(239, 68, 68, 0.1); }
+.btn-icon svg { width: 16px; height: 16px; }
