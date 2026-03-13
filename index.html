@@ -29,8 +29,8 @@
                 <span>Dashboard</span>
             </a>
             <a href="#" class="nav-item" data-page="novo-chargeback" id="nav-novo">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-                <span>Novo Chargeback</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/><path d="M12 6v6l4 2"/></svg>
+                <span>Radar de Ingestão</span>
             </a>
             <a href="#" class="nav-item" data-page="casos" id="nav-casos">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
@@ -108,49 +108,64 @@
         </section>
 
         <!-- Page: Novo Chargeback -->
-        <!-- Page: Novo Chargeback (Ingestão) -->
+        <!-- Page: Radar de Ingestão (Monitor de APIs) -->
         <section class="page" id="page-novo-chargeback">
-            <div class="ingestion-header">
-                <div class="ing-card">
-                    <span class="ing-label">API Pagar.me / Stripe</span>
-                    <span class="ing-status">● Webhooks Ativos</span>
+            <div class="radar-container">
+                <div class="radar-header">
+                    <div class="radar-main-status">
+                        <div class="radar-ring"></div>
+                        <div class="radar-info">
+                            <span class="radar-title">Monitorando Entradas</span>
+                            <span class="radar-subtitle">Escutando Pagar.me, Databricks e Gateways</span>
+                        </div>
+                    </div>
+                    <div class="radar-metrics">
+                        <div class="metric-box"><span class="m-val">99.9%</span><span class="m-lbl">Uptime API</span></div>
+                        <div class="metric-box"><span class="m-val">1.2s</span><span class="m-lbl">Sync Databricks</span></div>
+                    </div>
                 </div>
-                <div class="ing-card">
-                    <span class="ing-label">Triagem Inteligente (ML)</span>
-                    <span class="ing-status">● Análise Ativa</span>
-                </div>
-                <div class="ingestion-actions">
-                    <button class="btn btn-outline btn-sm" id="btn-sync-api">🔄 Sincronizar Databricks</button>
-                </div>
-            </div>
 
-            <div class="manual-trigger-card" style="margin-top: 20px;">
-                <div class="form-card">
-                    <h3 class="form-title">⚡ Triagem de Nova Entrada</h3>
-                    <p class="form-subtitle">O sistema processa automaticamente dados recebidos via API. Use o formulário para entradas manuais ou correções.</p>
-                    
-                    <div class="form-section">
-                        <div class="form-grid">
-                            <div class="form-group"><label>Transação (Pagar.me)</label><input type="text" id="transacao-id" placeholder="tran_xxxxxxxxxxxx"></div>
-                            <div class="form-group"><label>Valor (R$)</label><input type="number" id="transacao-valor" placeholder="0,00" step="0.01"></div>
-                            <div class="form-group"><label>Motivo</label><select id="cb-motivo"><option value="fraude">Fraude</option><option value="produto-nao-recebido">Não recebido</option></select></div>
-                            <div class="form-group"><label>Cliente</label><input type="text" id="cliente-nome" placeholder="Nome Completo"></div>
+                <div class="radar-grid">
+                    <div class="radar-feed">
+                        <div class="feed-header">
+                            <h3>🕒 Atividade em Tempo Real</h3>
+                            <button class="btn btn-outline btn-sm" id="btn-sync-api">🔄 Sync Manual Databricks</button>
+                        </div>
+                        <div class="radar-list" id="radar-event-list">
+                            <!-- Logs automáticos simulados -->
+                            <div class="radar-item high-priority">
+                                <div class="radar-icon">📡</div>
+                                <div class="radar-details">
+                                    <div class="r-top"><strong>WEBHOOK: Novo Chargeback</strong> <span class="r-time">Agora</span></div>
+                                    <div class="r-mid">Transação: <code>tran_589kLp2</code> | Valor: R$ 890,00 | Bandeira: Visa</div>
+                                    <div class="r-bot">
+                                        <span class="tag">IA: Suspeita de Fraude</span>
+                                        <span class="tag">DB: Logs Localizados</span>
+                                    </div>
+                                </div>
+                                <button class="btn-action-radar" onclick="advanceCase('DEF-2025')">Processar</button>
+                            </div>
+
+                            <div class="radar-item">
+                                <div class="radar-icon">📊</div>
+                                <div class="radar-details">
+                                    <div class="r-top"><strong>DATABRICKS: Enriquecimento Concluído</strong> <span class="r-time">Há 2 min</span></div>
+                                    <div class="r-mid">Anexando logs de IP 179.182.xx.xx e DeviceID: iPhone14,2 para Caso DEF-2024</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="form-actions">
-                        <button class="btn btn-primary" id="btn-registrar">🚀 Iniciar Fluxo de Automação</button>
-                    </div>
-                </div>
-                
-                <div class="ingestion-feed" style="margin-top: 25px;">
-                    <h3>🕒 Monitor de Eventos Recentes</h3>
-                    <div class="feed-item unread" style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                        <div>
-                            <div style="font-weight: 600; color: var(--white);">Webhook Recebido: Pagar.me</div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted);">TXN_506716 | R$ 1.200,00 | Triagem: <strong>Prioridade Alta (Prazo 3 dias)</strong></div>
+                    <div class="radar-side">
+                        <div class="manual-fallback-card">
+                            <h4>Entrada de Contingência</h4>
+                            <p>Use apenas se a API estiver fora do ar ou o evento não for detectado.</p>
+                            <button class="btn btn-primary btn-block" onclick="document.getElementById('modal-manual').style.display='flex'">+ Forçar Registro Manual</button>
                         </div>
-                        <span class="badge badge-success">Sincronizado</span>
+                        <div class="radar-tip">
+                            <div class="tip-icon">💡</div>
+                            <p><strong>Configuração:</strong> Sua API Key do Pagar.me atualiza este radar automaticamente a cada 30 segundos.</p>
+                        </div>
                     </div>
                 </div>
             </div>
