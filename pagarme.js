@@ -318,11 +318,14 @@ document.getElementById('btn-compilar-pdf')?.addEventListener('click', async () 
     btn.innerHTML = '⏳ Compilando PDF...';
 
     try {
+        if (!window.jspdf) {
+            throw new Error('Biblioteca jsPDF não carregada. Verifique sua conexão.');
+        }
         await generateFullPDF(cb);
         showToast('success', `PDF gerado: contestacao_${cb.transacao.id}.pdf`);
     } catch (err) {
         console.error('Erro ao gerar PDF:', err);
-        showToast('error', 'Erro ao gerar PDF completo');
+        showToast('error', `Erro: ${err.message || 'Falha ao compilar PDF'}`);
     } finally {
         btn.disabled = false;
         btn.innerHTML = originalText;
@@ -366,6 +369,7 @@ async function generateFullPDF(cb) {
             // Adicionar imagem redimensionada proporcionalmente
             try {
                 const imgProps = doc.getImageProperties(imageData);
+                const format = file.type.split('/')[1].toUpperCase(); // PNG, JPEG, etc.
                 const pdfWidth = doc.internal.pageSize.getWidth() - 30; // Margem de 15 de cada lado
                 const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
                 
@@ -377,10 +381,11 @@ async function generateFullPDF(cb) {
                     finalWidth = (imgProps.width * finalHeight) / imgProps.height;
                 }
                 
-                doc.addImage(imageData, 'JPEG', 15, 25, finalWidth, finalHeight);
+                // Usa o formato real da imagem
+                doc.addImage(imageData, format === 'PNG' ? 'PNG' : 'JPEG', 15, 25, finalWidth, finalHeight);
             } catch (e) {
                 console.warn('Erro ao processar imagem:', file.name, e);
-                doc.text('Erro ao carregar prévia desta imagem.', 15, 40);
+                doc.text(`[Erro ao carregar imagem: ${file.name}]`, 15, 40);
             }
         } else if (file.type === 'application/pdf') {
             doc.addPage();
