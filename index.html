@@ -108,50 +108,49 @@
         </section>
 
         <!-- Page: Novo Chargeback -->
+        <!-- Page: Novo Chargeback (Ingestão) -->
         <section class="page" id="page-novo-chargeback">
-            <div class="form-container">
+            <div class="ingestion-header">
+                <div class="ing-card">
+                    <span class="ing-label">API Pagar.me / Stripe</span>
+                    <span class="ing-status">● Webhooks Ativos</span>
+                </div>
+                <div class="ing-card">
+                    <span class="ing-label">Triagem Inteligente (ML)</span>
+                    <span class="ing-status">● Análise Ativa</span>
+                </div>
+                <div class="ingestion-actions">
+                    <button class="btn btn-outline btn-sm" id="btn-sync-api">🔄 Sincronizar Databricks</button>
+                </div>
+            </div>
+
+            <div class="manual-trigger-card" style="margin-top: 20px;">
                 <div class="form-card">
+                    <h3 class="form-title">⚡ Triagem de Nova Entrada</h3>
+                    <p class="form-subtitle">O sistema processa automaticamente dados recebidos via API. Use o formulário para entradas manuais ou correções.</p>
+                    
                     <div class="form-section">
-                        <h3 class="form-section-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Dados do Cliente</h3>
                         <div class="form-grid">
-                            <div class="form-group"><label for="cliente-nome">Nome do Cliente</label><input type="text" id="cliente-nome" placeholder="Nome completo"></div>
-                            <div class="form-group"><label for="cliente-email">E-mail</label><input type="email" id="cliente-email" placeholder="email@exemplo.com"></div>
-                            <div class="form-group"><label for="cliente-cpf">CPF/CNPJ</label><input type="text" id="cliente-cpf" placeholder="000.000.000-00"></div>
-                            <div class="form-group"><label for="cliente-telefone">Telefone</label><input type="tel" id="cliente-telefone" placeholder="(00) 00000-0000"></div>
+                            <div class="form-group"><label>Transação (Pagar.me)</label><input type="text" id="transacao-id" placeholder="tran_xxxxxxxxxxxx"></div>
+                            <div class="form-group"><label>Valor (R$)</label><input type="number" id="transacao-valor" placeholder="0,00" step="0.01"></div>
+                            <div class="form-group"><label>Motivo</label><select id="cb-motivo"><option value="fraude">Fraude</option><option value="produto-nao-recebido">Não recebido</option></select></div>
+                            <div class="form-group"><label>Cliente</label><input type="text" id="cliente-nome" placeholder="Nome Completo"></div>
                         </div>
                     </div>
-                    <div class="form-section">
-                        <h3 class="form-section-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Dados da Transação</h3>
-                        <div class="form-grid">
-                            <div class="form-group"><label for="transacao-id">ID da Transação (Pagar.me)</label><input type="text" id="transacao-id" placeholder="tran_xxxxxxxxxxxxxxxx"></div>
-                            <div class="form-group"><label for="transacao-valor">Valor (R$)</label><input type="number" id="transacao-valor" placeholder="0,00" step="0.01"></div>
-                            <div class="form-group"><label for="transacao-data">Data da Transação</label><input type="date" id="transacao-data"></div>
-                            <div class="form-group"><label for="transacao-bandeira">Bandeira do Cartão</label><select id="transacao-bandeira"><option value="">Selecione...</option><option value="visa">Visa</option><option value="mastercard">Mastercard</option><option value="elo">Elo</option><option value="amex">American Express</option><option value="hipercard">Hipercard</option></select></div>
-                        </div>
-                    </div>
-                    <div class="form-section">
-                        <h3 class="form-section-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Detalhes do Chargeback</h3>
-                        <div class="form-grid">
-                            <div class="form-group"><label for="cb-motivo">Motivo do Chargeback</label><select id="cb-motivo"><option value="">Selecione o motivo...</option><option value="fraude">Fraude / Transação não reconhecida</option><option value="produto-nao-recebido">Produto não recebido</option><option value="produto-diferente">Produto diferente do descrito</option><option value="cobranca-duplicada">Cobrança duplicada</option><option value="cancelamento">Cancelamento não processado</option><option value="valor-incorreto">Valor incorreto</option><option value="servico-nao-prestado">Serviço não prestado</option><option value="outros">Outros</option></select></div>
-                            <div class="form-group"><label for="cb-codigo">Código do Motivo (Reason Code)</label><input type="text" id="cb-codigo" placeholder="Ex: 4853, 10.4"></div>
-                            <div class="form-group"><label for="cb-data-recebimento">Data de Recebimento</label><input type="date" id="cb-data-recebimento"></div>
-                            <div class="form-group"><label for="cb-prazo">Prazo para Resposta</label><input type="date" id="cb-prazo"></div>
-                            <div class="form-group full-width"><label for="cb-descricao">Descrição / Observações</label><textarea id="cb-descricao" rows="4" placeholder="Descreva os detalhes do chargeback..."></textarea></div>
-                        </div>
-                    </div>
-                    <div class="form-section">
-                        <h3 class="form-section-title"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>Evidências</h3>
-                        <div class="upload-area" id="upload-area">
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                            <p>Arraste e solte arquivos aqui ou <span class="upload-link">clique para selecionar</span></p>
-                            <span class="upload-hint">Comprovantes, notas fiscais, provas de entrega, etc. (PDF, PNG, JPG até 10MB)</span>
-                            <input type="file" id="file-input" multiple accept=".pdf,.png,.jpg,.jpeg" hidden>
-                        </div>
-                        <div class="uploaded-files" id="uploaded-files"></div>
-                    </div>
+
                     <div class="form-actions">
-                        <button class="btn btn-secondary" id="btn-limpar">Limpar Formulário</button>
-                        <button class="btn btn-primary" id="btn-registrar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>Registrar Chargeback</button>
+                        <button class="btn btn-primary" id="btn-registrar">🚀 Iniciar Fluxo de Automação</button>
+                    </div>
+                </div>
+                
+                <div class="ingestion-feed" style="margin-top: 25px;">
+                    <h3>🕒 Monitor de Eventos Recentes</h3>
+                    <div class="feed-item unread" style="background: rgba(255,255,255,0.03); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                        <div>
+                            <div style="font-weight: 600; color: var(--white);">Webhook Recebido: Pagar.me</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">TXN_506716 | R$ 1.200,00 | Triagem: <strong>Prioridade Alta (Prazo 3 dias)</strong></div>
+                        </div>
+                        <span class="badge badge-success">Sincronizado</span>
                     </div>
                 </div>
             </div>
