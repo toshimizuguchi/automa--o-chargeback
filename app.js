@@ -40,6 +40,43 @@ let chargebacks = generateSampleData();
 let notifications = generateSampleNotifications();
 let uploadedFiles = [];
 
+// Função para Sync Manual do Banco de Dados
+async function syncFromDatabase() {
+    const btn = document.getElementById('btn-sync-now');
+    const originalText = btn.innerHTML;
+    
+    try {
+        btn.innerHTML = '🔄 Sincronizando...';
+        btn.classList.add('loading');
+
+        const response = await fetch('http://localhost:8000/api/chargebacks');
+        const dadosReais = await response.json();
+
+        if (dadosReais.error) throw new Error(dadosReais.error);
+
+        // Atualiza a lista global de chargebacks com os dados do banco
+        // Mantemos os samples se quiser, ou limpamos (vamos limpar para ver o real)
+        chargebacks = dadosReais;
+        
+        // Avisa o usuário e atualiza a interface
+        showToast('success', `${dadosReais.length} cases carregados do Supabase!`);
+        renderDashboard();
+        renderCasesTable();
+        
+    } catch (error) {
+        console.error("Erro no sync:", error);
+        showToast('error', 'Falha ao conectar com o Backend API local.');
+    } finally {
+        btn.innerHTML = originalText;
+        btn.classList.remove('loading');
+    }
+}
+
+// Bind do botão de Sync
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('btn-sync-now')?.addEventListener('click', syncFromDatabase);
+});
+
 // ============================================
 // SAMPLE DATA GENERATORS
 // ============================================

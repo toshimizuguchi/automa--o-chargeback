@@ -32,7 +32,7 @@ try:
             print("✅ Sucesso! Conectado ao banco.")
             print("Hora atual no banco:", resultado['now'])
     
-    conn.close()
+#     conn.close()
 
 except Exception as e:
     print(f"❌ Falha ao conectar: {e}")
