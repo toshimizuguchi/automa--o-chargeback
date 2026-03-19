@@ -49,32 +49,83 @@ async function syncFromDatabase() {
         btn.innerHTML = '🔄 Sincronizando...';
         btn.classList.add('loading');
 
-        const response = await fetch('http://localhost:8000/api/chargebacks/');
+        // Usa o hostname atual se for localhost ou o endereço configurado
+        const apiHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                        ? 'http://127.0.0.1:8000' 
+                        : ''; 
+
+        const response = await fetch(`${apiHost}/api/chargebacks/`);
+        
+        if (!response.ok) throw new Error(`Status: ${response.status}`);
+        
         const dadosReais = await response.json();
 
         if (dadosReais.error) throw new Error(dadosReais.error);
 
-        // Atualiza a lista global de chargebacks com os dados do banco
-        // Mantemos os samples se quiser, ou limpamos (vamos limpar para ver o real)
+        // Atualiza a lista global com os dados do banco
         chargebacks = dadosReais;
         
-        // Avisa o usuário e atualiza a interface
-        showToast('success', `${dadosReais.length} cases carregados do Supabase!`);
+        showToast('success', `${dadosReais.length} cases carregados do banco de dados!`);
         renderDashboard();
         renderCasesTable();
         
     } catch (error) {
         console.error("Erro no sync:", error);
-        showToast('error', 'Falha ao conectar com o Backend API local.');
+        showToast('error', 'Falha ao conectar com o Backend API. Verifique se o servidor Django está rodando na porta 8000.');
     } finally {
         btn.innerHTML = originalText;
         btn.classList.remove('loading');
     }
 }
 
-// Bind do botão de Sync
+// Função para Salvar Nova Entrada Manualmente
+function salvarNovaEntrada() {
+    const nome = document.getElementById('manual-nome').value;
+    const email = document.getElementById('manual-email').value;
+    const valor = document.getElementById('manual-valor').value;
+    const txnId = document.getElementById('manual-txn').value;
+    const motivo = document.getElementById('manual-motivo').value;
+
+    if (!nome || !valor) {
+        showToast('warning', 'Preencha ao menos o nome e o valor.');
+        return;
+    }
+
+    const novoCb = {
+        id: `CB-${Date.now().toString().slice(-7)}`,
+        cliente: {
+            nome: nome,
+            email: email || 'contato@exemplo.com',
+            cpf: '000.000.000-00',
+            telefone: '(11) 99999-9999'
+        },
+        transacao: {
+            id: txnId || `TXN-${Math.floor(Math.random() * 900000 + 100000)}`,
+            valor: parseFloat(valor),
+            data: new Date(),
+            bandeira: 'visa'
+        },
+        motivo: motivo,
+        dataRecebimento: new Date(),
+        prazo: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        status: 'recebido',
+        historico: [{ data: new Date(), texto: 'Caso registrado manualmente no console.' }]
+    };
+
+    chargebacks.unshift(novoCb);
+    showToast('success', 'Entrada personalizada registrada!');
+    renderDashboard();
+    renderCasesTable();
+    
+    // Fecha o modal e limpa form
+    document.getElementById('modal-manual').style.display = 'none';
+    document.getElementById('form-nova-entrada').reset();
+}
+
+// Bind de botões e eventos
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-sync-now')?.addEventListener('click', syncFromDatabase);
+    document.getElementById('btn-salvar-manual')?.addEventListener('click', salvarNovaEntrada);
 });
 
 // ============================================

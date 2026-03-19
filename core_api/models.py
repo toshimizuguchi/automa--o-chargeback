@@ -32,6 +32,12 @@ class Chargeback(models.Model):
     status_processo = models.CharField(max_length=50, default="Pendente")
     data_cadastro = models.DateTimeField(auto_now_add=True)
 
+    # Campos adicionais encontrados no banco
+    nome_titular_cartao = models.CharField(max_length=255, null=True, blank=True)
+    origem_arquivo = models.CharField(max_length=255, null=True, blank=True)
+    linha_origem = models.IntegerField(null=True, blank=True)
+    data_atualizacao = models.DateTimeField(auto_now=True)
+
     class Meta:
         db_table = 'chargeback'
         managed = False

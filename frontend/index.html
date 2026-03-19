@@ -326,7 +326,61 @@
         </section>
     </main>
 
-    <div class="modal-overlay" id="modal-overlay"><div class="modal" id="detail-modal"><div class="modal-header"><h3 id="modal-title">Detalhes do Chargeback</h3><button class="modal-close" id="modal-close"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div><div class="modal-body" id="modal-body"></div><div class="modal-footer" id="modal-footer"></div></div></div>
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal" id="detail-modal">
+            <div class="modal-header">
+                <h3 id="modal-title">Detalhes do Chargeback</h3>
+                <button class="modal-close" id="modal-close"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+            </div>
+            <div class="modal-body" id="modal-body"></div>
+            <div class="modal-footer" id="modal-footer"></div>
+        </div>
+    </div>
+
+    <!-- Modal: Nova Entrada Manual -->
+    <div class="modal-overlay" id="modal-manual" style="display:none;">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Nova Entrada de Chargeback</h3>
+                <button class="modal-close" onclick="document.getElementById('modal-manual').style.display='none'"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+            </div>
+            <div class="modal-body">
+                <form id="form-nova-entrada" class="defesa-form-row" style="flex-direction: column; gap: 15px;">
+                    <div class="defesa-form-field">
+                        <label>Nome do Cliente</label>
+                        <input type="text" id="manual-nome" placeholder="Ex: Vinicius Silva" class="defesa-select" style="width: 100%;">
+                    </div>
+                    <div class="defesa-form-field">
+                        <label>E-mail</label>
+                        <input type="email" id="manual-email" placeholder="cliente@exemplo.com" class="defesa-select" style="width: 100%;">
+                    </div>
+                    <div style="display: flex; gap: 15px; width: 100%;">
+                        <div class="defesa-form-field" style="flex:1">
+                            <label>Valor (R$)</label>
+                            <input type="number" step="0.01" id="manual-valor" placeholder="150.00" class="defesa-select" style="width: 100%;">
+                        </div>
+                        <div class="defesa-form-field" style="flex:1">
+                            <label>ID Transação Pagar.me</label>
+                            <input type="text" id="manual-txn" placeholder="TXN-123456" class="defesa-select" style="width: 100%;">
+                        </div>
+                    </div>
+                    <div class="defesa-form-field">
+                        <label>Motivo</label>
+                        <select id="manual-motivo" class="defesa-select" style="width: 100%;">
+                            <option value="fraude">Fraude</option>
+                            <option value="produto-nao-recebido">Produto não recebido</option>
+                            <option value="cancelamento">Cancelamento</option>
+                            <option value="outros">Outros</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="document.getElementById('modal-manual').style.display='none'">Cancelar</button>
+                <button class="btn btn-primary" id="btn-salvar-manual">Salvar Entrada</button>
+            </div>
+        </div>
+    </div>
     <div class="notification-panel" id="notification-panel"><div class="notification-panel-header"><h3>Notificações</h3><button class="btn-link" id="notification-clear">Limpar todas</button></div><div class="notification-list" id="notification-list"></div></div>
     <div class="toast-container" id="toast-container"></div>
     <script src="app.js"></script>
