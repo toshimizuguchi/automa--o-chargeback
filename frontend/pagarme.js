@@ -218,7 +218,7 @@ function generateDefenseLetter(cb) {
     if (!body) return;
     
     // Pegar dados do perfil selecionado ou do padrão
-    const perfilId = document.getElementById('defesa-perfil-select')?.value;
+    const perfilId = document.getElementById('defesa-perfil-select').value;
     let dados = { ...appConfig };
     
     if (perfilId && perfilId !== 'default') {
@@ -339,7 +339,7 @@ function getDefenseArgument(motivo, cb) {
 // ============================================
 // PDF COMPILATION LOGIC
 // ============================================
-document.getElementById('btn-compilar-pdf')?.addEventListener('click', async (e) => {
+document.getElementById('btn-compilar-pdf').addEventListener('click', async (e) => {
     // Evita propagação e execuções múltiplas
     e.preventDefault();
     e.stopPropagation();
@@ -464,13 +464,13 @@ function readFileAsDataURL(file) {
 // ============================================
 // CARTA ACTIONS
 // ============================================
-document.getElementById('btn-copiar-carta')?.addEventListener('click', () => {
-    const text = document.getElementById('carta-body')?.textContent || '';
+document.getElementById('btn-copiar-carta').addEventListener('click', () => {
+    const text = document.getElementById('carta-body').textContent || '';
     navigator.clipboard.writeText(text).then(() => showToast('success', 'Carta copiada para a área de transferência!'));
 });
 
-document.getElementById('btn-download-carta')?.addEventListener('click', () => {
-    const text = document.getElementById('carta-body')?.textContent || '';
+document.getElementById('btn-download-carta').addEventListener('click', () => {
+    const text = document.getElementById('carta-body').textContent || '';
     const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
     const cb = chargebacks.find(c => c.id === selectedDefesaCaseId);
@@ -479,7 +479,7 @@ document.getElementById('btn-download-carta')?.addEventListener('click', () => {
     a.click(); showToast('success', 'Carta de defesa baixada!');
 });
 
-document.getElementById('btn-gerar-carta')?.addEventListener('click', () => {
+document.getElementById('btn-gerar-carta').addEventListener('click', () => {
     if (selectedDefesaCaseId) {
         const cb = chargebacks.find(c => c.id === selectedDefesaCaseId);
         if (cb) { generateDefenseLetter(cb); showToast('info', 'Carta de defesa regenerada!'); }
@@ -489,7 +489,7 @@ document.getElementById('btn-gerar-carta')?.addEventListener('click', () => {
 // ============================================
 // ENVIO PAGAR.ME (SIMULADO)
 // ============================================
-document.getElementById('btn-enviar-pagarme')?.addEventListener('click', () => {
+document.getElementById('btn-enviar-pagarme').addEventListener('click', () => {
     if (!selectedDefesaCaseId) return;
     const cb = chargebacks.find(c => c.id === selectedDefesaCaseId);
     if (!cb) return;
@@ -516,8 +516,8 @@ document.getElementById('btn-enviar-pagarme')?.addEventListener('click', () => {
 // ============================================
 const defUpload = document.getElementById('defesa-upload-area');
 const defInput = document.getElementById('defesa-file-input');
-defUpload?.addEventListener('click', () => defInput?.click());
-defInput?.addEventListener('change', (e) => {
+defUpload.addEventListener('click', () => defInput.click());
+defInput.addEventListener('change', (e) => {
     Array.from(e.target.files).forEach(f => defesaFiles.push(f));
     renderDefesaFiles(); 
     if (selectedDefesaCaseId) updateSendButton(selectedDefesaCaseId);
@@ -595,7 +595,7 @@ function deleteProfile(id) {
     }
 }
 
-document.getElementById('btn-novo-perfil')?.addEventListener('click', () => {
+document.getElementById('btn-novo-perfil').addEventListener('click', () => {
     editingProfileId = 'new_' + Date.now();
     document.getElementById('profile-editor-section').style.display = 'block';
     
@@ -612,12 +612,12 @@ document.getElementById('btn-novo-perfil')?.addEventListener('click', () => {
 
 function saveConfig() {
     // API Keys e Globais
-    appConfig.apiKey = document.getElementById('config-api-key')?.value || '';
-    appConfig.ambiente = document.getElementById('config-ambiente')?.value || 'test';
-    appConfig.autoAnalise = document.getElementById('auto-analise')?.checked ?? true;
-    appConfig.autoCarta = document.getElementById('auto-carta')?.checked ?? true;
-    appConfig.autoAlertaPrazo = document.getElementById('auto-alerta-prazo')?.checked ?? true;
-    appConfig.autoEnvioPagarme = document.getElementById('auto-envio-pagarme')?.checked ?? false;
+    appConfig.apiKey = document.getElementById('config-api-key').value || '';
+    appConfig.ambiente = document.getElementById('config-ambiente').value || 'test';
+    appConfig.autoAnalise = document.getElementById('auto-analise').checked || true;
+    appConfig.autoCarta = document.getElementById('auto-carta').checked || true;
+    appConfig.autoAlertaPrazo = document.getElementById('auto-alerta-prazo').checked || true;
+    appConfig.autoEnvioPagarme = document.getElementById('auto-envio-pagarme').checked || false;
 
     // Se estiver editando um perfil
     if (editingProfileId) {
@@ -652,10 +652,10 @@ function saveConfigToStore() {
     localStorage.setItem('chargeguard_config', JSON.stringify(appConfig));
 }
 
-document.getElementById('btn-salvar-config')?.addEventListener('click', saveConfig);
+document.getElementById('btn-salvar-config').addEventListener('click', saveConfig);
 
-document.getElementById('btn-testar-conexao')?.addEventListener('click', () => {
-    const key = document.getElementById('config-api-key')?.value || '';
+document.getElementById('btn-testar-conexao').addEventListener('click', () => {
+    const key = document.getElementById('config-api-key').value || '';
     if (!key || key.length < 10) { showToast('error', 'Insira uma API Key válida do Pagar.me'); return; }
     showToast('info', '🔄 Testando conexão com Pagar.me...');
     setTimeout(() => {
@@ -711,7 +711,7 @@ if (_origRenderCasesTable) {
         if (!tbody) return;
         let filtered = chargebacks;
         if (currentFilterLocal !== 'todos') filtered = chargebacks.filter(c => c.status === currentFilterLocal);
-        const searchTerm = document.getElementById('search-input')?.value.toLowerCase() || '';
+        const searchTerm = document.getElementById('search-input').value.toLowerCase() || '';
         if (searchTerm) filtered = filtered.filter(c => c.id.toLowerCase().includes(searchTerm) || c.cliente.nome.toLowerCase().includes(searchTerm));
 
         tbody.innerHTML = filtered.map(c => {
@@ -741,8 +741,8 @@ if (_origRenderCasesTable) {
 function goToDefesa(caseId) {
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById('nav-defesa')?.classList.add('active');
-    document.getElementById('page-defesa')?.classList.add('active');
+    document.getElementById('nav-defesa').classList.add('active');
+    document.getElementById('page-defesa').classList.add('active');
     document.getElementById('page-title').textContent = 'Defesa Pagar.me';
     document.getElementById('page-subtitle').textContent = 'Gerar carta de defesa e enviar disputa';
     initDefesaPage();

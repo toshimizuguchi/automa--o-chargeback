@@ -40,97 +40,101 @@ let chargebacks = generateSampleData();
 let notifications = generateSampleNotifications();
 let uploadedFiles = [];
 
+// Configuração de API (Detecta se é local ou Vercel)
+var API_ROOT = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    ? 'http://127.0.0.1:8000'
+    : 'https://sua-url-do-backend.com'; // AJUSTE AQUI SEU BACKEND DE PRODUÇÃO
+
 // Função para Sync Manual do Banco de Dados
 async function syncFromDatabase() {
-    console.log("Botão Forçar Sync clicado");
+    console.log("Iniciando Sincronização...");
     var btn = document.getElementById('btn-sync-now');
     if (!btn) return;
-    
+
     var originalText = btn.innerHTML;
-    
     try {
         btn.innerHTML = '🔄 Sincronizando...';
         btn.classList.add('loading');
 
-        // Endereço fixo para evitar problemas de hostname
-        var apiURL = 'http://127.0.0.1:8000/api/chargebacks/';
-        console.log("Iniciando busca em:", apiURL);
+        var url = API_ROOT + '/api/chargebacks/';
+        console.log("Buscando dados em:", url);
 
-        const response = await fetch(apiURL);
-        console.log("Resposta da API:", response.status);
+        var response = await fetch(url);
+        if (!response.ok) throw new Error("Erro de conexão: " + response.status);
         
-        if (!response.ok) throw new Error("Erro no servidor: " + response.status);
-        
-        const dadosReais = await response.json();
-        console.log("Dados carregados:", dadosReais);
+        var dadosReais = await response.json();
+        console.log("Dados carregados com sucesso!");
 
-        // Atualiza a variável global
+        // Atribui à variável global
         chargebacks = dadosReais;
         
-        showToast('success', dadosReais.length + ' casos carregados com sucesso!');
-        renderDashboard();
-        renderCasesTable();
+        if (typeof showToast === 'function') {
+            showToast('success', dadosReais.length + ' casos sincronizados do banco!');
+        }
+        
+        if (typeof renderDashboard === 'function') renderDashboard();
+        if (typeof renderCasesTable === 'function') renderCasesTable();
         
     } catch (error) {
-        console.error("Erro no sync:", error);
-        showToast('error', 'Erro ao conectar. Veja o Console (F12).');
+        console.error("Erro fatal no sync:", error);
+        if (typeof showToast === 'function') {
+            showToast('error', 'Erro ao conectar com o banco de dados.');
+        } else {
+            alert('Erro de conexão: Verifique seu servidor local.');
+        }
     } finally {
         btn.innerHTML = originalText;
         btn.classList.remove('loading');
     }
 }
 
-// Tornar global explicitamente
+// Tornar funções globais para o HTML
 window.openManualModal = function() {
     console.log("Abrindo modal manual...");
     var modal = document.getElementById('modal-manual');
     if (modal) {
         modal.style.display = 'flex';
         modal.classList.add('active');
-    } else {
-        console.error("Elemento modal-manual não encontrado!");
     }
 };
 
 window.salvarNovaEntrada = function() {
-    console.log("Tentando salvar nova entrada...");
-    var nome = document.getElementById('manual-nome').value;
-    var email = document.getElementById('manual-email').value;
-    var valor = document.getElementById('manual-valor').value;
-    var txnId = document.getElementById('manual-txn').value;
-    var motivo = document.getElementById('manual-motivo').value;
-
-    if (!nome || !valor) {
-        showToast('warning', 'Nome e valor são obrigatórios.');
+    console.log("Processando nova entrada manual...");
+    var nomeEl = document.getElementById('manual-nome');
+    var valorEl = document.getElementById('manual-valor');
+    if (!nomeEl || !valorEl || !nomeEl.value || !valorEl.value) {
+        if (typeof showToast === 'function') showToast('warning', 'Preencha nome e valor!');
         return;
     }
 
     var novoCb = {
         id: 'CB-' + Date.now().toString().slice(-7),
         cliente: {
-            nome: nome,
-            email: email || 'contato@exemplo.com',
+            nome: nomeEl.value,
+            email: document.getElementById('manual-email').value || 'contato@cliente.com',
             cpf: '000.000.000-00',
             telefone: '(11) 99999-9999'
         },
         transacao: {
-            id: txnId || 'TXN-' + Math.floor(Math.random() * 900000 + 100000),
-            valor: parseFloat(valor),
+            id: document.getElementById('manual-txn').value || 'TXN-' + Math.floor(Math.random() * 900000),
+            valor: parseFloat(valorEl.value),
             data: new Date(),
             bandeira: 'visa'
         },
-        motivo: motivo,
+        motivo: document.getElementById('manual-motivo').value,
         dataRecebimento: new Date(),
         prazo: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         status: 'recebido',
-        historico: [{ data: new Date(), texto: 'Caso registrado manualmente.' }]
+        historico: [{ data: new Date(), texto: 'Entrada manual registrada.' }]
     };
 
-    chargebacks.unshift(novoCb);
-    showToast('success', 'Caso adicionado à lista!');
-    renderDashboard();
-    renderCasesTable();
-    
+    if (window.chargebacks) {
+        window.chargebacks.unshift(novoCb);
+        if (typeof showToast === 'function') showToast('success', 'Caso adicionado com sucesso!');
+        if (typeof renderDashboard === 'function') renderDashboard();
+        if (typeof renderCasesTable === 'function') renderCasesTable();
+    }
+
     var modal = document.getElementById('modal-manual');
     if (modal) {
         modal.style.display = 'none';
@@ -140,16 +144,18 @@ window.salvarNovaEntrada = function() {
     if (form) form.reset();
 };
 
-// Bind inicial
+// Inicialização segura
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("Página carregada, vinculando botões...");
+    console.log("ChargeGuard App Inicializado!");
+    
     var btnSync = document.getElementById('btn-sync-now');
     if (btnSync) {
-        btnSync.addEventListener('click', syncFromDatabase);
+        btnSync.onclick = syncFromDatabase;
     }
+
     var btnSalvar = document.getElementById('btn-salvar-manual');
     if (btnSalvar) {
-        btnSalvar.addEventListener('click', window.salvarNovaEntrada);
+        btnSalvar.onclick = window.salvarNovaEntrada;
     }
 });
 
