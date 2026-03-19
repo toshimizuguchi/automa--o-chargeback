@@ -42,70 +42,71 @@ let uploadedFiles = [];
 
 // Função para Sync Manual do Banco de Dados
 async function syncFromDatabase() {
-    const btn = document.getElementById('btn-sync-now');
-    const originalText = btn.innerHTML;
+    console.log("Botão Forçar Sync clicado");
+    var btn = document.getElementById('btn-sync-now');
+    if (!btn) return;
+    
+    var originalText = btn.innerHTML;
     
     try {
         btn.innerHTML = '🔄 Sincronizando...';
         btn.classList.add('loading');
 
-        // Usa o hostname atual se for localhost ou o endereço configurado
-        const apiHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-                        ? 'http://127.0.0.1:8000' 
-                        : ''; 
+        // Endereço fixo para evitar problemas de hostname
+        var apiURL = 'http://127.0.0.1:8000/api/chargebacks/';
+        console.log("Iniciando busca em:", apiURL);
 
-        console.log("Iniciando sincronização com:", `${apiHost}/api/chargebacks/`);
-        const response = await fetch(`${apiHost}/api/chargebacks/`);
+        const response = await fetch(apiURL);
+        console.log("Resposta da API:", response.status);
         
-        console.log("Resposta recebida:", response.status);
-        if (!response.ok) throw new Error(`Status: ${response.status}`);
+        if (!response.ok) throw new Error("Erro no servidor: " + response.status);
         
         const dadosReais = await response.json();
-        console.log("Dados recebidos da API:", dadosReais);
+        console.log("Dados carregados:", dadosReais);
 
-        if (dadosReais.error) throw new Error(dadosReais.error);
-
-        // Atualiza a lista global com os dados do banco
+        // Atualiza a variável global
         chargebacks = dadosReais;
         
-        showToast('success', `${dadosReais.length} cases carregados do banco de dados!`);
+        showToast('success', dadosReais.length + ' casos carregados com sucesso!');
         renderDashboard();
         renderCasesTable();
         
     } catch (error) {
         console.error("Erro no sync:", error);
-        showToast('error', 'Falha ao conectar com o Backend API. Verifique o Console (F12) para detalhes.');
+        showToast('error', 'Erro ao conectar. Veja o Console (F12).');
     } finally {
         btn.innerHTML = originalText;
         btn.classList.remove('loading');
     }
 }
 
-// Função para Abrir Modal
-function openManualModal() {
-    const modal = document.getElementById('modal-manual');
+// Tornar global explicitamente
+window.openManualModal = function() {
+    console.log("Abrindo modal manual...");
+    var modal = document.getElementById('modal-manual');
     if (modal) {
         modal.style.display = 'flex';
-        modal.classList.add('active'); // Garante que a classe active seja aplicada se o CSS exigir
+        modal.classList.add('active');
+    } else {
+        console.error("Elemento modal-manual não encontrado!");
     }
-}
+};
 
-// Função para Salvar Nova Entrada Manualmente
-function salvarNovaEntrada() {
-    console.log("Salvando nova entrada manual...");
-    const nome = document.getElementById('manual-nome').value;
-    const email = document.getElementById('manual-email').value;
-    const valor = document.getElementById('manual-valor').value;
-    const txnId = document.getElementById('manual-txn').value;
-    const motivo = document.getElementById('manual-motivo').value;
+window.salvarNovaEntrada = function() {
+    console.log("Tentando salvar nova entrada...");
+    var nome = document.getElementById('manual-nome').value;
+    var email = document.getElementById('manual-email').value;
+    var valor = document.getElementById('manual-valor').value;
+    var txnId = document.getElementById('manual-txn').value;
+    var motivo = document.getElementById('manual-motivo').value;
 
     if (!nome || !valor) {
-        showToast('warning', 'Preencha ao menos o nome e o valor.');
+        showToast('warning', 'Nome e valor são obrigatórios.');
         return;
     }
 
-    const novoCb = {
-        id: `CB-${Date.now().toString().slice(-7)}`,
+    var novoCb = {
+        id: 'CB-' + Date.now().toString().slice(-7),
         cliente: {
             nome: nome,
             email: email || 'contato@exemplo.com',
@@ -113,7 +114,7 @@ function salvarNovaEntrada() {
             telefone: '(11) 99999-9999'
         },
         transacao: {
-            id: txnId || `TXN-${Math.floor(Math.random() * 900000 + 100000)}`,
+            id: txnId || 'TXN-' + Math.floor(Math.random() * 900000 + 100000),
             valor: parseFloat(valor),
             data: new Date(),
             bandeira: 'visa'
@@ -122,24 +123,34 @@ function salvarNovaEntrada() {
         dataRecebimento: new Date(),
         prazo: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         status: 'recebido',
-        historico: [{ data: new Date(), texto: 'Caso registrado manualmente no console.' }]
+        historico: [{ data: new Date(), texto: 'Caso registrado manualmente.' }]
     };
 
     chargebacks.unshift(novoCb);
-    showToast('success', 'Entrada personalizada registrada!');
+    showToast('success', 'Caso adicionado à lista!');
     renderDashboard();
     renderCasesTable();
     
-    // Fecha o modal e limpa form
-    document.getElementById('modal-manual').style.display = 'none';
-    document.getElementById('modal-manual').classList.remove('active');
-    document.getElementById('form-nova-entrada').reset();
-}
+    var modal = document.getElementById('modal-manual');
+    if (modal) {
+        modal.style.display = 'none';
+        modal.classList.remove('active');
+    }
+    var form = document.getElementById('form-nova-entrada');
+    if (form) form.reset();
+};
 
-// Bind de botões e eventos
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('btn-sync-now')?.addEventListener('click', syncFromDatabase);
-    document.getElementById('btn-salvar-manual')?.addEventListener('click', salvarNovaEntrada);
+// Bind inicial
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("Página carregada, vinculando botões...");
+    var btnSync = document.getElementById('btn-sync-now');
+    if (btnSync) {
+        btnSync.addEventListener('click', syncFromDatabase);
+    }
+    var btnSalvar = document.getElementById('btn-salvar-manual');
+    if (btnSalvar) {
+        btnSalvar.addEventListener('click', window.salvarNovaEntrada);
+    }
 });
 
 // ============================================
