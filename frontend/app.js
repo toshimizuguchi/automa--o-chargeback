@@ -49,7 +49,7 @@ async function syncFromDatabase() {
         btn.innerHTML = '🔄 Sincronizando...';
         btn.classList.add('loading');
 
-        const response = await fetch('http://localhost:8000/api/chargebacks');
+        const response = await fetch('http://localhost:8000/api/chargebacks/');
         const dadosReais = await response.json();
 
         if (dadosReais.error) throw new Error(dadosReais.error);

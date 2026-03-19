@@ -1,6 +1,10 @@
 from config.supabase_bn import conn  # Importa a conexão que configuramos
 
 def salvar(chargeback):
+    """
+    Persiste um objeto Chargeback na tabela 'chargeback' do Supabase.
+    Mapeia os campos do objeto para as colunas SQL esperadas.
+    """
     print(f"Salvando no banco real: {chargeback.tipo} - R$ {chargeback.valor}")
     
     try:

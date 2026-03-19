@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from config.supabase_bn import conn
 import psycopg2.extras
 
-app = FastAPI()
+app = FastAPI(title="ChargeGuard API", description="API para gestão de chargebacks integrada ao Supabase")
 
 # Permite que o seu frontend (que roda no 127.0.0.1:8080) acesse esta API
 app.add_middleware(
@@ -15,6 +15,10 @@ app.add_middleware(
 
 @app.get("/api/chargebacks")
 def get_chargebacks():
+    """
+    Retorna a lista de todos os chargebacks cadastrados no banco de dados.
+    Formata os dados para compatibilidade com o frontend (app.js).
+    """
     try:
         # Reabre a conexão se ela tiver sido fechada por timeout
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:

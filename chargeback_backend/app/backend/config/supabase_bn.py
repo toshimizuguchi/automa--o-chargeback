@@ -3,6 +3,11 @@ from psycopg2.extras import RealDictCursor
 from dotenv import load_dotenv
 import os
 
+"""
+Módulo de configuração da conexão com o banco de dados Supabase.
+Carrega as variáveis de ambiente e estabelece a conexão global 'conn'.
+"""
+
 # Carrega as variáveis de ambiente do arquivo .env
 load_dotenv()
 
