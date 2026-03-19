@@ -54,11 +54,14 @@ async function syncFromDatabase() {
                         ? 'http://127.0.0.1:8000' 
                         : ''; 
 
+        console.log("Iniciando sincronização com:", `${apiHost}/api/chargebacks/`);
         const response = await fetch(`${apiHost}/api/chargebacks/`);
         
+        console.log("Resposta recebida:", response.status);
         if (!response.ok) throw new Error(`Status: ${response.status}`);
         
         const dadosReais = await response.json();
+        console.log("Dados recebidos da API:", dadosReais);
 
         if (dadosReais.error) throw new Error(dadosReais.error);
 
@@ -71,15 +74,25 @@ async function syncFromDatabase() {
         
     } catch (error) {
         console.error("Erro no sync:", error);
-        showToast('error', 'Falha ao conectar com o Backend API. Verifique se o servidor Django está rodando na porta 8000.');
+        showToast('error', 'Falha ao conectar com o Backend API. Verifique o Console (F12) para detalhes.');
     } finally {
         btn.innerHTML = originalText;
         btn.classList.remove('loading');
     }
 }
 
+// Função para Abrir Modal
+function openManualModal() {
+    const modal = document.getElementById('modal-manual');
+    if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('active'); // Garante que a classe active seja aplicada se o CSS exigir
+    }
+}
+
 // Função para Salvar Nova Entrada Manualmente
 function salvarNovaEntrada() {
+    console.log("Salvando nova entrada manual...");
     const nome = document.getElementById('manual-nome').value;
     const email = document.getElementById('manual-email').value;
     const valor = document.getElementById('manual-valor').value;
@@ -92,6 +105,7 @@ function salvarNovaEntrada() {
     }
 
     const novoCb = {
+        // ... (resto do objeto permanece igual)
         id: `CB-${Date.now().toString().slice(-7)}`,
         cliente: {
             nome: nome,
