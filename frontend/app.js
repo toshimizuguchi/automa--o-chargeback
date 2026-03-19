@@ -105,7 +105,6 @@ function salvarNovaEntrada() {
     }
 
     const novoCb = {
-        // ... (resto do objeto permanece igual)
         id: `CB-${Date.now().toString().slice(-7)}`,
         cliente: {
             nome: nome,
@@ -133,6 +132,7 @@ function salvarNovaEntrada() {
     
     // Fecha o modal e limpa form
     document.getElementById('modal-manual').style.display = 'none';
+    document.getElementById('modal-manual').classList.remove('active');
     document.getElementById('form-nova-entrada').reset();
 }
 
