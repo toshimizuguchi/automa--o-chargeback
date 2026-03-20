@@ -154,15 +154,42 @@ window.salvarNovaEntrada = function() {
     if (form) form.reset();
 };
 
+window.fecharManualModal = function() {
+    console.log("Fechando modal manual...");
+    var modal = document.getElementById('modal-manual');
+    if (modal) {
+        modal.style.display = 'none';
+        modal.classList.remove('active');
+    }
+};
+
 // Inicialização segura
 document.addEventListener('DOMContentLoaded', function() {
     console.log("ChargeGuard App Inicializado!");
     
-    // Adiciona listener via delegação de eventos caso o botão demore a aparecer
+    // Adiciona listener via delegação de eventos
     document.addEventListener('click', function(e) {
-        if (e.target && (e.target.id === 'btn-sync-now' || e.target.closest('#btn-sync-now'))) {
-            console.log("Botão de Sync clicado!");
+        const target = e.target;
+        
+        // 1. Botão de Sync
+        if (target.id === 'btn-sync-now' || target.closest('#btn-sync-now')) {
+            console.log("Botão de Sync detectado e clicado!");
             syncFromDatabase();
+            return;
+        }
+
+        // 2. Abrir Modal de Nova Entrada
+        if (target.id === 'btn-nova-entrada' || target.closest('#btn-nova-entrada')) {
+            console.log("Botão Nova Entrada clicado!");
+            window.openManualModal();
+            return;
+        }
+
+        // 3. Fechar Modal (botão X ou Cancelar)
+        if (target.id === 'modal-close-manual' || target.closest('#modal-close-manual') || 
+            target.id === 'btn-cancelar-manual' || target.closest('#btn-cancelar-manual')) {
+            window.fecharManualModal();
+            return;
         }
     });
 

@@ -118,7 +118,7 @@
                     </div>
                     <div class="op-actions">
                         <button class="btn btn-outline btn-sm" id="btn-sync-now">🔄 Forçar Sync</button>
-                        <button class="btn btn-primary btn-sm" onclick="openManualModal()">+ Nova Entrada</button>
+                        <button class="btn btn-primary btn-sm" id="btn-nova-entrada">+ Nova Entrada</button>
                     </div>
                 </div>
 
@@ -343,7 +343,7 @@
         <div class="modal">
             <div class="modal-header">
                 <h3>Nova Entrada de Chargeback</h3>
-                <button class="modal-close" onclick="document.getElementById('modal-manual').style.display='none'"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                <button class="modal-close" id="modal-close-manual"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
             </div>
             <div class="modal-body">
                 <form id="form-nova-entrada" class="defesa-form-row" style="flex-direction: column; gap: 15px;">
@@ -377,7 +377,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-outline" onclick="document.getElementById('modal-manual').style.display='none'">Cancelar</button>
+                <button class="btn btn-outline" id="btn-cancelar-manual">Cancelar</button>
                 <button class="btn btn-primary" id="btn-salvar-manual">Salvar Entrada</button>
             </div>
         </div>
