@@ -35,15 +35,23 @@ const BANDEIRAS_MAP = {
     'hipercard': 'Hipercard'
 };
 
-// Sample Data
-let chargebacks = generateSampleData();
-let notifications = generateSampleNotifications();
-let uploadedFiles = [];
+// Variáveis Globais (Expostas no window para acesso entre scripts)
+window.chargebacks = generateSampleData();
+window.notifications = generateSampleNotifications();
+window.uploadedFiles = [];
 
-// Configuração de API (Detecta se é local ou Vercel)
-var API_ROOT = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    ? 'http://127.0.0.1:8000'
-    : 'https://sua-url-do-backend.com'; // AJUSTE AQUI SEU BACKEND DE PRODUÇÃO
+// Configuração de API (Prioriza localStorage, depois ambiente local ou padrão)
+function getApiRoot() {
+    var config = JSON.parse(localStorage.getItem('chargeguard_config') || '{}');
+    if (config.backendUrl && config.backendUrl.trim() !== '') {
+        return config.backendUrl.trim().replace(/\/$/, ''); // Remove barra final se houver
+    }
+    return (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+        ? 'http://127.0.0.1:8000'
+        : window.location.origin; // Assume mesmo domínio por padrão no Vercel
+}
+
+var API_ROOT = getApiRoot();
 
 // Função para Sync Manual do Banco de Dados
 async function syncFromDatabase() {
@@ -56,6 +64,8 @@ async function syncFromDatabase() {
         btn.innerHTML = '🔄 Sincronizando...';
         btn.classList.add('loading');
 
+        // Re-valida API_ROOT antes da chamada
+        API_ROOT = getApiRoot();
         var url = API_ROOT + '/api/chargebacks/';
         console.log("Buscando dados em:", url);
 
@@ -66,7 +76,7 @@ async function syncFromDatabase() {
         console.log("Dados carregados com sucesso!");
 
         // Atribui à variável global
-        chargebacks = dadosReais;
+        window.chargebacks = dadosReais;
         
         if (typeof showToast === 'function') {
             showToast('success', dadosReais.length + ' casos sincronizados do banco!');
@@ -148,10 +158,13 @@ window.salvarNovaEntrada = function() {
 document.addEventListener('DOMContentLoaded', function() {
     console.log("ChargeGuard App Inicializado!");
     
-    var btnSync = document.getElementById('btn-sync-now');
-    if (btnSync) {
-        btnSync.onclick = syncFromDatabase;
-    }
+    // Adiciona listener via delegação de eventos caso o botão demore a aparecer
+    document.addEventListener('click', function(e) {
+        if (e.target && (e.target.id === 'btn-sync-now' || e.target.closest('#btn-sync-now'))) {
+            console.log("Botão de Sync clicado!");
+            syncFromDatabase();
+        }
+    });
 
     var btnSalvar = document.getElementById('btn-salvar-manual');
     if (btnSalvar) {
@@ -361,11 +374,11 @@ function renderDashboard() {
 }
 
 function updateMetrics() {
-    const total = chargebacks.length;
-    const emDisputa = chargebacks.filter(c => c.status === 'em-disputa').length;
-    const ganhos = chargebacks.filter(c => c.status === 'ganho');
+    const total = window.chargebacks.length;
+    const emDisputa = window.chargebacks.filter(c => c.status === 'em-disputa').length;
+    const ganhos = window.chargebacks.filter(c => c.status === 'ganho');
     const valorRecuperado = ganhos.reduce((sum, c) => sum + c.transacao.valor, 0);
-    const resolvidos = chargebacks.filter(c => ['ganho', 'perdido'].includes(c.status));
+    const resolvidos = window.chargebacks.filter(c => ['ganho', 'perdido'].includes(c.status));
     const taxaSucesso = resolvidos.length > 0 ? ((ganhos.length / resolvidos.length) * 100).toFixed(0) : 0;
 
     animateCounter('metric-total-value', total);
@@ -493,7 +506,7 @@ function renderReasonsChart() {
 
     // Count reasons
     const reasonCounts = {};
-    chargebacks.forEach(c => {
+    window.chargebacks.forEach(c => {
         const label = MOTIVOS_MAP[c.motivo] || c.motivo;
         reasonCounts[label] = (reasonCounts[label] || 0) + 1;
     });
@@ -554,7 +567,7 @@ function renderRecentCases() {
     const tbody = document.getElementById('recent-cases-body');
     if (!tbody) return;
     
-    const recent = chargebacks.slice(0, 5);
+    const recent = window.chargebacks.slice(0, 5);
     tbody.innerHTML = recent.map(c => `
         <tr>
             <td><span style="color: var(--indigo-400); font-weight: 600;">${c.id}</span></td>
@@ -585,10 +598,11 @@ function renderCasesTable(filter = currentFilter) {
     currentFilter = filter;
     const tbody = document.getElementById('cases-table-body');
     if (!tbody) return;
+    tbody.innerHTML = ''; // Limpa antes de renderizar
 
-    let filtered = chargebacks;
+    let filtered = window.chargebacks;
     if (filter !== 'todos') {
-        filtered = chargebacks.filter(c => c.status === filter);
+        filtered = window.chargebacks.filter(c => c.status === filter);
     }
 
     const searchTerm = document.getElementById('search-input')?.value.toLowerCase() || '';
@@ -657,10 +671,10 @@ document.getElementById('select-all')?.addEventListener('change', (e) => {
 // ============================================
 function renderFlowPipeline() {
     const stages = {
-        'recebido': chargebacks.filter(c => c.status === 'recebido'),
-        'analise': chargebacks.filter(c => c.status === 'em-analise'),
-        'disputa': chargebacks.filter(c => c.status === 'em-disputa'),
-        'resolucao': chargebacks.filter(c => c.status === 'ganho' || c.status === 'perdido')
+        'recebido': window.chargebacks.filter(c => c.status === 'recebido'),
+        'analise': window.chargebacks.filter(c => c.status === 'em-analise'),
+        'disputa': window.chargebacks.filter(c => c.status === 'em-disputa'),
+        'resolucao': window.chargebacks.filter(c => c.status === 'ganho' || c.status === 'perdido')
     };
 
     Object.entries(stages).forEach(([key, cases]) => {

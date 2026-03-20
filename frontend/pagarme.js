@@ -7,6 +7,7 @@ let appConfig = JSON.parse(localStorage.getItem('chargeguard_config') || 'null')
     profiles: [],
     currentProfileId: null,
     apiKey: '', ambiente: 'test', 
+    backendUrl: '', // URL do Django API
     autoAnalise: true, autoCarta: true, autoAlertaPrazo: true, autoEnvioPagarme: false, connected: false
 };
 let editingProfileId = null;
@@ -120,7 +121,7 @@ function initDefesaPage() {
     // Carregar perfis de empresas disponíveis
     renderProfileSelector();
     
-    const activeCases = chargebacks.filter(c => !['ganho', 'perdido'].includes(c.status));
+    const activeCases = window.chargebacks.filter(c => !['ganho', 'perdido'].includes(c.status));
     select.innerHTML = '<option value="">Selecione um caso...</option>' +
         activeCases.map(c => `<option value="${c.id}">${c.id} — ${c.cliente.nome} — R$ ${c.transacao.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (${MOTIVOS_MAP[c.motivo]})</option>`).join('');
     
@@ -140,7 +141,7 @@ function initDefesaPage() {
 }
 
 function showDefesaPanels(caseId) {
-    const cb = chargebacks.find(c => c.id === caseId);
+    const cb = window.chargebacks.find(c => c.id === caseId);
     if (!cb) return;
     document.getElementById('checklist-card').style.display = 'block';
     document.getElementById('pagarme-send-card').style.display = 'block';
@@ -163,7 +164,7 @@ function renderProfileSelector() {
         profiles.map(p => `<option value="${p.id}">${p.empresa}</option>`).join('');
     
     select.onchange = () => {
-        const cb = chargebacks.find(c => c.id === selectedDefesaCaseId);
+        const cb = window.chargebacks.find(c => c.id === selectedDefesaCaseId);
         if (cb) generateDefenseLetter(cb);
     };
 }
@@ -184,7 +185,7 @@ function renderChecklist(caseId) {
         </div>
     `).join('');
     // Store proof completion on the case
-    const cb = chargebacks.find(c => c.id === caseId);
+    const cb = window.chargebacks.find(c => c.id === caseId);
     if (cb) cb.proofComplete = total > 0 ? Math.round((done / total) * 100) : 0;
 }
 
@@ -473,7 +474,7 @@ document.getElementById('btn-download-carta').addEventListener('click', () => {
     const text = document.getElementById('carta-body').textContent || '';
     const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-    const cb = chargebacks.find(c => c.id === selectedDefesaCaseId);
+    const cb = window.chargebacks.find(c => c.id === selectedDefesaCaseId);
     const fileName = cb ? `carta_defesa_${cb.transacao.id}.txt` : `carta_defesa_${selectedDefesaCaseId}.txt`;
     a.download = fileName;
     a.click(); showToast('success', 'Carta de defesa baixada!');
@@ -481,7 +482,7 @@ document.getElementById('btn-download-carta').addEventListener('click', () => {
 
 document.getElementById('btn-gerar-carta').addEventListener('click', () => {
     if (selectedDefesaCaseId) {
-        const cb = chargebacks.find(c => c.id === selectedDefesaCaseId);
+        const cb = window.chargebacks.find(c => c.id === selectedDefesaCaseId);
         if (cb) { generateDefenseLetter(cb); showToast('info', 'Carta de defesa regenerada!'); }
     }
 });
@@ -491,7 +492,7 @@ document.getElementById('btn-gerar-carta').addEventListener('click', () => {
 // ============================================
 document.getElementById('btn-enviar-pagarme').addEventListener('click', () => {
     if (!selectedDefesaCaseId) return;
-    const cb = chargebacks.find(c => c.id === selectedDefesaCaseId);
+    const cb = window.chargebacks.find(c => c.id === selectedDefesaCaseId);
     if (!cb) return;
     const btn = document.getElementById('btn-enviar-pagarme');
     btn.disabled = true; btn.innerHTML = '⏳ Enviando via API Pagar.me...';
@@ -535,6 +536,7 @@ function renderDefesaFiles() {
 function loadConfig() {
     document.getElementById('config-api-key') && (document.getElementById('config-api-key').value = appConfig.apiKey);
     document.getElementById('config-ambiente') && (document.getElementById('config-ambiente').value = appConfig.ambiente);
+    document.getElementById('config-backend-url') && (document.getElementById('config-backend-url').value = appConfig.backendUrl || '');
     
     document.getElementById('auto-analise') && (document.getElementById('auto-analise').checked = appConfig.autoAnalise);
     document.getElementById('auto-carta') && (document.getElementById('auto-carta').checked = appConfig.autoCarta);
@@ -614,6 +616,7 @@ function saveConfig() {
     // API Keys e Globais
     appConfig.apiKey = document.getElementById('config-api-key').value || '';
     appConfig.ambiente = document.getElementById('config-ambiente').value || 'test';
+    appConfig.backendUrl = document.getElementById('config-backend-url') ? document.getElementById('config-backend-url').value.trim() : '';
     appConfig.autoAnalise = document.getElementById('auto-analise').checked || true;
     appConfig.autoCarta = document.getElementById('auto-carta').checked || true;
     appConfig.autoAlertaPrazo = document.getElementById('auto-alerta-prazo').checked || true;
@@ -709,8 +712,8 @@ if (_origRenderCasesTable) {
         const currentFilterLocal = filter || currentFilter;
         const tbody = document.getElementById('cases-table-body');
         if (!tbody) return;
-        let filtered = chargebacks;
-        if (currentFilterLocal !== 'todos') filtered = chargebacks.filter(c => c.status === currentFilterLocal);
+        let filtered = window.chargebacks;
+        if (currentFilterLocal !== 'todos') filtered = window.chargebacks.filter(c => c.status === currentFilterLocal);
         const searchTerm = document.getElementById('search-input').value.toLowerCase() || '';
         if (searchTerm) filtered = filtered.filter(c => c.id.toLowerCase().includes(searchTerm) || c.cliente.nome.toLowerCase().includes(searchTerm));
 
