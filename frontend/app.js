@@ -197,6 +197,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (btnSalvar) {
         btnSalvar.onclick = window.salvarNovaEntrada;
     }
+
+    // Inicializar listeners dos filtros e busca
+    initCasesListeners();
 });
 
 // ============================================
@@ -632,7 +635,8 @@ function renderCasesTable(filter = currentFilter) {
         filtered = window.chargebacks.filter(c => c.status === filter);
     }
 
-    const searchTerm = document.getElementById('search-input')?.value.toLowerCase() || '';
+    var searchEl = document.getElementById('search-input');
+    var searchTerm = searchEl ? searchEl.value.toLowerCase() : '';
     if (searchTerm) {
         filtered = filtered.filter(c => 
             c.id.toLowerCase().includes(searchTerm) ||
@@ -672,26 +676,32 @@ function renderCasesTable(filter = currentFilter) {
     `).join('');
 }
 
-// Filter chips
-document.querySelectorAll('.chip[data-filter]').forEach(chip => {
-    chip.addEventListener('click', () => {
-        document.querySelectorAll('.chip[data-filter]').forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
-        renderCasesTable(chip.dataset.filter);
+// Filter chips, Search e Select All — inicializados no DOMContentLoaded abaixo
+function initCasesListeners() {
+    document.querySelectorAll('.chip[data-filter]').forEach(function(chip) {
+        chip.addEventListener('click', function() {
+            document.querySelectorAll('.chip[data-filter]').forEach(function(c) { c.classList.remove('active'); });
+            chip.classList.add('active');
+            renderCasesTable(chip.dataset.filter);
+        });
     });
-});
 
-// Search
-document.getElementById('search-input')?.addEventListener('input', () => {
-    if (document.getElementById('page-casos').classList.contains('active')) {
-        renderCasesTable();
+    var searchInput = document.getElementById('search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            if (document.getElementById('page-casos').classList.contains('active')) {
+                renderCasesTable();
+            }
+        });
     }
-});
 
-// Select All
-document.getElementById('select-all')?.addEventListener('change', (e) => {
-    document.querySelectorAll('.case-checkbox').forEach(cb => cb.checked = e.target.checked);
-});
+    var selectAll = document.getElementById('select-all');
+    if (selectAll) {
+        selectAll.addEventListener('change', function(e) {
+            document.querySelectorAll('.case-checkbox').forEach(function(cb) { cb.checked = e.target.checked; });
+        });
+    }
+}
 
 // ============================================
 // FLOW PIPELINE
