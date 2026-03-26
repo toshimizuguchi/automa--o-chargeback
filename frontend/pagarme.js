@@ -726,7 +726,7 @@ if (_origRenderCasesTable) {
             return `<tr>
                 <td><input type="checkbox" class="case-checkbox" data-id="${c.id}"></td>
                 <td><span style="color:var(--indigo-400);font-weight:600">${c.id}</span></td>
-                <td><div><span>${c.cliente.nome}</span><br><span style="font-size:0.72rem;color:var(--text-muted)">${c.cliente.email}</span></div></td>
+                <td><div><span>${maskName(c.cliente.nome)}</span><br><span style="font-size:0.72rem;color:var(--text-muted)">${maskEmail(c.cliente.email)}</span></div></td>
                 <td><strong>R$ ${c.transacao.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></td>
                 <td>${MOTIVOS_MAP[c.motivo] || c.motivo}</td>
                 <td>${BANDEIRAS_MAP[c.transacao.bandeira] || c.transacao.bandeira}</td>

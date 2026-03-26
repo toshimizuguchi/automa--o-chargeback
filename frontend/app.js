@@ -122,8 +122,14 @@ window.salvarNovaEntrada = function() {
     console.log("Processando nova entrada manual...");
     var nomeEl = document.getElementById('manual-nome');
     var valorEl = document.getElementById('manual-valor');
+    var consentimento = document.getElementById('manual-consentimento');
     if (!nomeEl || !valorEl || !nomeEl.value || !valorEl.value) {
         if (typeof showToast === 'function') showToast('warning', 'Preencha nome e valor!');
+        return;
+    }
+
+    if (!consentimento || !consentimento.checked) {
+        if (typeof showToast === 'function') showToast('error', 'Você deve aceitar o processamento de dados (LGPD)!');
         return;
     }
 
@@ -490,7 +496,7 @@ function renderRecentCases() {
     tbody.innerHTML = recent.map(c => `
         <tr>
             <td><span style="color: var(--indigo-400); font-weight: 600;">${c.id}</span></td>
-            <td>${c.cliente.nome}</td>
+            <td>${maskName(c.cliente.nome)}</td>
             <td><strong>R$ ${c.transacao.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></td>
             <td>${MOTIVOS_MAP[c.motivo] || c.motivo}</td>
             <td>${getStatusBadge(c.status)}</td>
@@ -540,8 +546,8 @@ function renderCasesTable(filter = currentFilter) {
             <td><span style="color: var(--indigo-400); font-weight: 600;">${c.id}</span></td>
             <td>
                 <div style="display: flex; flex-direction: column;">
-                    <span>${c.cliente.nome}</span>
-                    <span style="font-size: 0.72rem; color: var(--text-muted);">${c.cliente.email}</span>
+                    <span>${maskName(c.cliente.nome)}</span>
+                    <span style="font-size: 0.72rem; color: var(--text-muted);">${maskEmail(c.cliente.email)}</span>
                 </div>
             </td>
             <td><strong>R$ ${c.transacao.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></td>
@@ -913,6 +919,29 @@ function formatDate(date) {
     return new Date(date).toLocaleDateString('pt-BR');
 }
 
+// LGPD Helpers: Mascaramento de dados para privacidade
+function maskCPF(cpf) {
+    if (!cpf) return "---.---.----**";
+    // Formato: 123.***.***-**
+    return cpf.substring(0, 4) + "***.***-**";
+}
+
+function maskEmail(email) {
+    if (!email) return "*****@***.com";
+    const [user, domain] = email.split('@');
+    if (!domain) return email;
+    // Formato: v****@origem.com
+    return user.substring(0, 1) + "****@" + domain;
+}
+
+function maskName(name) {
+    if (!name) return "Cliente Anônimo";
+    const parts = name.split(' ');
+    // Exibe apenas o primeiro nome e a inicial do último
+    if (parts.length > 1) return parts[0] + " " + parts[parts.length - 1][0] + ".";
+    return parts[0];
+}
+
 // ============================================
 // CASE ACTIONS
 // ============================================
@@ -1014,15 +1043,15 @@ function openCaseDetail(id) {
         <div class="detail-grid">
             <div class="detail-group">
                 <div class="detail-label">Cliente</div>
-                <div class="detail-value">${cb.cliente.nome}</div>
+                <div class="detail-value">${maskName(cb.cliente.nome)}</div>
             </div>
             <div class="detail-group">
                 <div class="detail-label">E-mail</div>
-                <div class="detail-value">${cb.cliente.email}</div>
+                <div class="detail-value">${maskEmail(cb.cliente.email)}</div>
             </div>
             <div class="detail-group">
                 <div class="detail-label">CPF</div>
-                <div class="detail-value">${cb.cliente.cpf}</div>
+                <div class="detail-value">${maskCPF(cb.cliente.cpf)}</div>
             </div>
             <div class="detail-group">
                 <div class="detail-label">Telefone</div>
