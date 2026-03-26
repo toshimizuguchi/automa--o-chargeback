@@ -62,10 +62,17 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+from corsheaders.defaults import default_headers
+
 # SEGURANÇA: Restringir origens (ex: frontend-url.vercel.app,http://localhost:5173)
 ALLOWED_ORIGINS_RAW = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:5500,http://127.0.0.1:5500,http://localhost:8080").split(",")
 CORS_ALLOWED_ORIGINS = [origin for origin in ALLOWED_ORIGINS_RAW if origin]
 CORS_ALLOW_CREDENTIALS = True
+
+# Permitir o Header personalizado para o Token de API
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "X-API-Key",
+]
 
 ROOT_URLCONF = 'chargeguard_project.urls'
 
