@@ -1,9 +1,16 @@
-from ninja import NinjaAPI, Schema
-from typing import List, Optional
-from .models import Chargeback
-from datetime import datetime
+import os
+from ninja.security import APIKeyHeader
 
-api = NinjaAPI(title="ChargeGuard API Ninja")
+class ApiKeyAuth(APIKeyHeader):
+    param_name = "X-API-Key"
+
+    def authenticate(self, request, key):
+        # SEGURANÇA: Chave definida no .env. Padrão apenas para dev.
+        API_TOKEN = os.getenv("CHARGEGUARD_API_TOKEN", "super-secret-default-token")
+        if key == API_TOKEN:
+            return key
+
+api = NinjaAPI(title="ChargeGuard API Ninja", auth=ApiKeyAuth())
 
 # Schemas (Pydantic models)
 class ClienteSchema(Schema):

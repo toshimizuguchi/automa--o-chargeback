@@ -69,8 +69,18 @@ async function syncFromDatabase() {
         var url = API_ROOT + '/api/chargebacks/';
         console.log("Buscando dados em:", url);
 
-        var response = await fetch(url);
-        if (!response.ok) throw new Error("Erro de conexão: " + response.status);
+        // Obtém o token de segurança das configurações
+        var config = JSON.parse(localStorage.getItem('chargeguard_config') || '{}');
+        var token = config.cgToken || '';
+
+        var response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'X-API-Key': token,
+                'Content-Type': 'application/json'
+            }
+        });
+        if (!response.ok) throw new Error("Erro de conexão (HTTP " + response.status + "): Verifique o Token de Segurança.");
         
         var dadosReais = await response.json();
         console.log("Dados carregados com sucesso!");

@@ -8,6 +8,7 @@ let appConfig = JSON.parse(localStorage.getItem('chargeguard_config') || 'null')
     currentProfileId: null,
     apiKey: '', ambiente: 'test', 
     backendUrl: '', // URL do Django API
+    cgToken: '',    // Token de segurança do ChargeGuard
     autoAnalise: true, autoCarta: true, autoAlertaPrazo: true, autoEnvioPagarme: false, connected: false
 };
 let editingProfileId = null;
@@ -537,6 +538,7 @@ function loadConfig() {
     document.getElementById('config-api-key') && (document.getElementById('config-api-key').value = appConfig.apiKey);
     document.getElementById('config-ambiente') && (document.getElementById('config-ambiente').value = appConfig.ambiente);
     document.getElementById('config-backend-url') && (document.getElementById('config-backend-url').value = appConfig.backendUrl || '');
+    document.getElementById('config-cg-token') && (document.getElementById('config-cg-token').value = appConfig.cgToken || '');
     
     document.getElementById('auto-analise') && (document.getElementById('auto-analise').checked = appConfig.autoAnalise);
     document.getElementById('auto-carta') && (document.getElementById('auto-carta').checked = appConfig.autoCarta);
@@ -617,6 +619,7 @@ function saveConfig() {
     appConfig.apiKey = document.getElementById('config-api-key').value || '';
     appConfig.ambiente = document.getElementById('config-ambiente').value || 'test';
     appConfig.backendUrl = document.getElementById('config-backend-url') ? document.getElementById('config-backend-url').value.trim() : '';
+    appConfig.cgToken = document.getElementById('config-cg-token') ? document.getElementById('config-cg-token').value.trim() : '';
     appConfig.autoAnalise = document.getElementById('auto-analise').checked || true;
     appConfig.autoCarta = document.getElementById('auto-carta').checked || true;
     appConfig.autoAlertaPrazo = document.getElementById('auto-alerta-prazo').checked || true;

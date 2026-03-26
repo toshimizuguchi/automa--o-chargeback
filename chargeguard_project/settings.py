@@ -24,13 +24,14 @@ load_dotenv(BASE_DIR / ".env")
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-!^0xe6@)5$&7800-_9q*-c!zt-(g3#j9)ffd)f#y&6iqef6k5w'
+# SEGURANÇA: Chave secreta no .env. Nunca compartilhe esta chave publicamente.
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-default-development-key")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# SEGURANÇA: DEBUG deve ser False em produção.
+DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() == "true"
 
-ALLOWED_HOSTS = ['*']
+# SEGURANÇA: Liste os domínios permitidos (ex: meu-backend.vercel.app,localhost)
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,*").split(",")
 
 
 # Application definition
@@ -61,7 +62,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True # Para desenvolvimento
+# SEGURANÇA: Restringir origens (ex: frontend-url.vercel.app,http://localhost:5173)
+ALLOWED_ORIGINS_RAW = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:5500,http://127.0.0.1:5500,http://localhost:8080").split(",")
+CORS_ALLOWED_ORIGINS = [origin for origin in ALLOWED_ORIGINS_RAW if origin]
+CORS_ALLOW_CREDENTIALS = True
 
 ROOT_URLCONF = 'chargeguard_project.urls'
 
