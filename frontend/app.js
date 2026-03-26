@@ -36,8 +36,8 @@ const BANDEIRAS_MAP = {
 };
 
 // Variáveis Globais (Expostas no window para acesso entre scripts)
-window.chargebacks = generateSampleData();
-window.notifications = generateSampleNotifications();
+window.chargebacks = [];
+window.notifications = [];
 window.uploadedFiles = [];
 
 // Configuração de API (Prioriza localStorage, depois ambiente local ou padrão)
@@ -205,139 +205,8 @@ document.addEventListener('DOMContentLoaded', function() {
 // ============================================
 // SAMPLE DATA GENERATORS
 // ============================================
-function generateSampleData() {
-    const nomes = [
-        'João Silva', 'Maria Santos', 'Pedro Oliveira', 'Ana Costa', 
-        'Lucas Ferreira', 'Gabriela Lima', 'Rafael Souza', 'Juliana Pereira',
-        'Bruno Martins', 'Camila Rodrigues', 'Felipe Almeida', 'Larissa Nascimento',
-        'Thiago Ribeiro', 'Fernanda Gomes', 'Matheus Barbosa'
-    ];
-    const motivos = Object.keys(MOTIVOS_MAP);
-    const bandeiras = Object.keys(BANDEIRAS_MAP);
-    const statuses = ['recebido', 'em-analise', 'em-disputa', 'ganho', 'perdido'];
+// Excluídos Geradores de Dados de Exemplo (Soliticação do Usuário)
 
-    const data = [];
-    for (let i = 0; i < 25; i++) {
-        const nome = nomes[Math.floor(Math.random() * nomes.length)];
-        const motivo = motivos[Math.floor(Math.random() * motivos.length)];
-        const bandeira = bandeiras[Math.floor(Math.random() * bandeiras.length)];
-        const status = statuses[Math.floor(Math.random() * statuses.length)];
-        const valor = (Math.random() * 5000 + 50).toFixed(2);
-        const dataTransacao = new Date(2026, Math.floor(Math.random() * 3), Math.floor(Math.random() * 28) + 1);
-        const dataRecebimento = new Date(dataTransacao.getTime() + Math.random() * 15 * 24 * 60 * 60 * 1000);
-        const prazo = new Date(dataRecebimento.getTime() + 30 * 24 * 60 * 60 * 1000);
-
-        const historico = [{
-            data: dataRecebimento,
-            texto: 'Chargeback registrado no sistema'
-        }];
-
-        if (['em-analise', 'em-disputa', 'ganho', 'perdido'].includes(status)) {
-            historico.push({
-                data: new Date(dataRecebimento.getTime() + 2 * 24 * 60 * 60 * 1000),
-                texto: 'Caso movido para análise. Coleta de evidências iniciada.'
-            });
-        }
-        if (['em-disputa', 'ganho', 'perdido'].includes(status)) {
-            historico.push({
-                data: new Date(dataRecebimento.getTime() + 7 * 24 * 60 * 60 * 1000),
-                texto: 'Defesa preparada e enviada à bandeira do cartão.'
-            });
-        }
-        if (['ganho', 'perdido'].includes(status)) {
-            historico.push({
-                data: new Date(dataRecebimento.getTime() + 20 * 24 * 60 * 60 * 1000),
-                texto: status === 'ganho' ? 'Disputa ganha! Valor recuperado com sucesso.' : 'Disputa perdida. Débito confirmado.'
-            });
-        }
-
-        data.push({
-            id: `CB-${String(2025001 + i).padStart(7, '0')}`,
-            cliente: {
-                nome,
-                email: nome.toLowerCase().replace(/\s/g, '.') + '@email.com',
-                cpf: generateCPF(),
-                telefone: generatePhone()
-            },
-            transacao: {
-                id: `TXN-${String(Math.floor(Math.random() * 999999)).padStart(6, '0')}`,
-                valor: parseFloat(valor),
-                data: dataTransacao,
-                bandeira
-            },
-            motivo,
-            codigoMotivo: `${Math.floor(Math.random() * 9999)}`,
-            dataRecebimento,
-            prazo,
-            status,
-            descricao: `Chargeback registrado pelo motivo: ${MOTIVOS_MAP[motivo]}`,
-            evidencias: [],
-            historico
-        });
-    }
-
-    return data.sort((a, b) => b.dataRecebimento - a.dataRecebimento);
-}
-
-function generateCPF() {
-    const n = () => Math.floor(Math.random() * 10);
-    return `${n()}${n()}${n()}.${n()}${n()}${n()}.${n()}${n()}${n()}-${n()}${n()}`;
-}
-
-function generatePhone() {
-    const n = () => Math.floor(Math.random() * 10);
-    return `(${n()}${n()}) ${n()}${n()}${n()}${n()}${n()}-${n()}${n()}${n()}${n()}`;
-}
-
-function generateSampleNotifications() {
-    return [
-        {
-            id: 1,
-            type: 'danger',
-            icon: '🚨',
-            title: 'Prazo Crítico!',
-            text: 'CB-2025003 vence em 2 dias. Ação imediata necessária.',
-            time: 'Há 1 hora',
-            unread: true
-        },
-        {
-            id: 2,
-            type: 'warning',
-            icon: '⚠️',
-            title: 'Novo Chargeback Recebido',
-            text: 'Chargeback de R$ 1.250,00 registrado por fraude.',
-            time: 'Há 3 horas',
-            unread: true
-        },
-        {
-            id: 3,
-            type: 'success',
-            icon: '✅',
-            title: 'Disputa Ganha!',
-            text: 'CB-2025010 — R$ 890,50 recuperado com sucesso.',
-            time: 'Há 5 horas',
-            unread: true
-        },
-        {
-            id: 4,
-            type: 'info',
-            icon: 'ℹ️',
-            title: 'Atualização de Status',
-            text: 'CB-2025005 movido para "Em Disputa".',
-            time: 'Ontem',
-            unread: false
-        },
-        {
-            id: 5,
-            type: 'warning',
-            icon: '⏰',
-            title: 'Lembrete de Prazo',
-            text: '3 chargebacks vencem esta semana.',
-            time: 'Ontem',
-            unread: false
-        }
-    ];
-}
 
 // ============================================
 // NAVIGATION
@@ -441,14 +310,24 @@ function renderTimelineChart() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Generate data for last 7 days
+    // Calcula dados reais dos últimos 7 dias
     const days = [];
     const values = [];
+    const now = new Date();
     for (let i = 6; i >= 0; i--) {
-        const d = new Date();
+        const d = new Date(now);
         d.setDate(d.getDate() - i);
-        days.push(d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }));
-        values.push(Math.floor(Math.random() * 8) + 1);
+        const dayLabel = d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+        days.push(dayLabel);
+        
+        // Conta casos recebidos neste dia
+        const count = window.chargebacks.filter(c => {
+            const dateC = new Date(c.dataRecebimento);
+            return dateC.getDate() === d.getDate() && 
+                   dateC.getMonth() === d.getMonth() && 
+                   dateC.getFullYear() === d.getFullYear();
+        }).length;
+        values.push(count);
     }
 
     const padding = { top: 20, right: 20, bottom: 40, left: 50 };
@@ -755,8 +634,19 @@ function renderMonthlyChart() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-    const received = months.map(() => Math.floor(Math.random() * 15) + 5);
-    const won = months.map((_, i) => Math.floor(received[i] * (0.4 + Math.random() * 0.3)));
+    const currentYear = new Date().getFullYear();
+    const received = months.map((_, mIdx) => {
+        return window.chargebacks.filter(c => {
+            const d = new Date(c.dataRecebimento);
+            return d.getMonth() === mIdx && d.getFullYear() === currentYear;
+        }).length;
+    });
+    const won = months.map((_, mIdx) => {
+        return window.chargebacks.filter(c => {
+            const d = new Date(c.dataRecebimento);
+            return d.getMonth() === mIdx && d.getFullYear() === currentYear && c.status === 'ganho';
+        }).length;
+    });
 
     const padding = { top: 20, right: 20, bottom: 40, left: 50 };
     const chartWidth = canvas.width - padding.left - padding.right;
@@ -949,7 +839,17 @@ function renderKPIs() {
     const dentroPrazo = atuais.filter(c => new Date(c.prazo) > new Date()).length;
     const taxaPrazo = atuais.length > 0 ? (dentroPrazo / atuais.length) * 100 : 0;
 
-    const tempoMedio = 14; // simulated
+    // Calcula tempo médio real baseado no histórico (aprox)
+    let tempoMedio = 0;
+    const resolvidosComTempo = window.chargebacks.filter(c => ['ganho', 'perdido'].includes(c.status) && c.historico.length > 1);
+    if (resolvidosComTempo.length > 0) {
+        const totalDias = resolvidosComTempo.reduce((acc, c) => {
+            const start = new Date(c.dataRecebimento);
+            const end = new Date(c.historico[c.historico.length - 1].data);
+            return acc + (end - start) / (1000 * 60 * 60 * 24);
+        }, 0);
+        tempoMedio = Math.round(totalDias / resolvidosComTempo.length);
+    }
     const volumeMensal = chargebacks.length;
 
     animateKPIRing('kpi-progress-taxa', 'kpi-value-taxa', taxaRecuperacao, '%');
@@ -1507,6 +1407,9 @@ document.addEventListener('click', (e) => {
 function init() {
     updateNotificationBadge();
     renderDashboard();
+    
+    // Inicia Sincronismo Automático se o Backend estiver acessível
+    syncFromDatabase();
 }
 
 init();
