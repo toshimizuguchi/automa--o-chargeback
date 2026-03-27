@@ -44,8 +44,13 @@ def get_chargebacks(request):
     formatted_data = []
     for cb in queryset:
         # Pega a descrição do motivo através da Foreign Key
-        motivo_str = cb.codigo_motivo.descricao_motivo if cb.codigo_motivo else (cb.motivo_informado or "Outros")
-        
+        # Segurança: Garante que motivo_str nunca seja None para não quebrar o Schema
+        motivo_str = "Outros"
+        if cb.codigo_motivo:
+            motivo_str = cb.codigo_motivo.descricao_motivo or cb.codigo_motivo.codigo_motivo or "Outros"
+        elif cb.motivo_informado:
+            motivo_str = cb.motivo_informado
+            
         formatted_data.append({
             "id": f"CB-{cb.id_chargeback}",
             "cliente": { 
@@ -54,10 +59,10 @@ def get_chargebacks(request):
             },
             "transacao": { 
                 "id": cb.id_transacao_pagarme or "N/A", 
-                "valor": float(cb.valor), 
+                "valor": float(cb.valor or 0), 
                 "bandeira": "visa" 
             },
-            "motivo": motivo_str,
+            "motivo": str(motivo_str),
             "status": cb.status_processo.lower() if cb.status_processo else "recebido",
             "dataRecebimento": cb.data_cadastro.isoformat() if cb.data_cadastro else None,
             "prazo": None
