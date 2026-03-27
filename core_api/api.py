@@ -21,7 +21,12 @@ class ClienteSchema(Schema):
 class TransacaoSchema(Schema):
     id: str
     valor: float
+    data: Optional[str] = None
     bandeira: str = "visa"
+
+class HistoricoSchema(Schema):
+    data: str
+    texto: str
 
 class ChargebackOut(Schema):
     id: str
@@ -31,6 +36,7 @@ class ChargebackOut(Schema):
     status: str
     dataRecebimento: Optional[str] = None
     prazo: Optional[str] = None
+    historico: List[HistoricoSchema] = []
 
 @api.get("/chargebacks/", response=List[ChargebackOut])
 def get_chargebacks(request):
@@ -58,12 +64,16 @@ def get_chargebacks(request):
             "transacao": { 
                 "id": cb.id_transacao_pagarme or "N/A", 
                 "valor": float(cb.valor or 0), 
+                "data": cb.data_cadastro.isoformat() if cb.data_cadastro else None,
                 "bandeira": "visa" 
             },
             "motivo": str(motivo_str),
             "status": cb.status_processo.lower() if cb.status_processo else "recebido",
             "dataRecebimento": cb.data_cadastro.isoformat() if cb.data_cadastro else None,
-            "prazo": None
+            "prazo": None,
+            "historico": [
+                {"data": cb.data_cadastro.isoformat() if cb.data_cadastro else "", "texto": "Caso registrado no banco de dados."}
+            ]
         })
     
     return formatted_data
