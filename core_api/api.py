@@ -1,25 +1,11 @@
 import os
 from ninja import NinjaAPI, Schema
-from ninja.security import APIKeyHeader
 from typing import List, Optional
 from .models import Chargeback
 
-class ApiKeyAuth(APIKeyHeader):
-    param_name = "X-API-Key"
+api = NinjaAPI(title="ChargeGuard API Ninja")
 
-    def authenticate(self, request, key):
-        # SEGURANÇA: Chave definida no .env ou nas Configs do Vercel.
-        # Caso não exista, usa o padrão abaixo.
-        API_TOKEN = (os.getenv("CHARGEGUARD_API_TOKEN") or "super-secret-default-token").strip()
-        
-        # Limpa espaços e valida (Proteção contra tokens 'undefined' ou vazios)
-        if key and key.strip() != "" and key.strip() == API_TOKEN:
-            return key
-        return None
-
-api = NinjaAPI(title="ChargeGuard API Ninja", auth=ApiKeyAuth())
-
-@api.get("/ping", auth=None)
+@api.get("/ping")
 def ping(request):
     """
     Endpoint simples para testar se a API está online sem precisar de senha.
