@@ -8,12 +8,24 @@ class ApiKeyAuth(APIKeyHeader):
     param_name = "X-API-Key"
 
     def authenticate(self, request, key):
-        # SEGURANÇA: Chave definida no .env. Padrão apenas para dev.
-        API_TOKEN = os.getenv("CHARGEGUARD_API_TOKEN", "super-secret-default-token")
-        if key == API_TOKEN:
+        # SEGURANÇA: Chave definida no .env ou nas Configs do Vercel.
+        # Caso não exista, usa o padrão abaixo.
+        API_TOKEN = (os.getenv("CHARGEGUARD_API_TOKEN") or "super-secret-default-token").strip()
+        
+        # Limpa espaços e valida (Proteção contra tokens 'undefined' ou vazios)
+        if key and key.strip() != "" and key.strip() == API_TOKEN:
             return key
+        return None
 
 api = NinjaAPI(title="ChargeGuard API Ninja", auth=ApiKeyAuth())
+
+@api.get("/ping", auth=None)
+def ping(request):
+    """
+    Endpoint simples para testar se a API está online sem precisar de senha.
+    Acesse: https://[seu-dominio]/api/ping
+    """
+    return {"status": "OK", "message": "ChargeGuard API está online e pronta!"}
 
 # Schemas (Pydantic models)
 class ClienteSchema(Schema):
