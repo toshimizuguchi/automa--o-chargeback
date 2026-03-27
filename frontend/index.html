@@ -73,9 +73,6 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                 <span>Configurações</span>
             </a>
-            <a href="#" class="nav-item" data-page="relatorios" id="nav-relatorios">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                <span>Relatórios</span>
             </a>
         </nav>
         <div class="sidebar-footer">
@@ -379,23 +376,7 @@
             </div>
         </section>
 
-        <!-- Page: Relatórios -->
-        <section class="page" id="page-relatorios">
-            <div class="reports-grid">
-                <div class="report-card wide"><div class="chart-header"><h3>Resumo Mensal</h3></div><canvas id="monthly-chart" width="800" height="280"></canvas></div>
-                <div class="report-card"><div class="chart-header"><h3>Distribuição por Status</h3></div><canvas id="status-chart" width="350" height="280"></canvas></div>
-                <div class="report-card"><div class="chart-header"><h3>Chargebacks por Bandeira</h3></div><canvas id="bandeira-chart" width="350" height="280"></canvas></div>
-                <div class="report-card wide" id="report-kpis"><div class="chart-header"><h3>Indicadores de Performance (KPIs)</h3></div>
-                    <div class="kpis-grid">
-                        <div class="kpi-item"><div class="kpi-ring"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" fill="none" stroke="#1e1e2e" stroke-width="10"/><circle cx="60" cy="60" r="52" fill="none" stroke="url(#kpiGrad1)" stroke-width="10" stroke-dasharray="326.73" stroke-dashoffset="326.73" stroke-linecap="round" transform="rotate(-90 60 60)" class="kpi-progress" id="kpi-progress-taxa"/><defs><linearGradient id="kpiGrad1" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#6366f1"/><stop offset="100%" stop-color="#8b5cf6"/></linearGradient></defs></svg><span class="kpi-ring-value" id="kpi-value-taxa">0%</span></div><span class="kpi-label">Taxa de Recuperação</span></div>
-                        <div class="kpi-item"><div class="kpi-ring"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" fill="none" stroke="#1e1e2e" stroke-width="10"/><circle cx="60" cy="60" r="52" fill="none" stroke="url(#kpiGrad2)" stroke-width="10" stroke-dasharray="326.73" stroke-dashoffset="326.73" stroke-linecap="round" transform="rotate(-90 60 60)" class="kpi-progress" id="kpi-progress-prazo"/><defs><linearGradient id="kpiGrad2" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#10b981"/><stop offset="100%" stop-color="#34d399"/></linearGradient></defs></svg><span class="kpi-ring-value" id="kpi-value-prazo">0%</span></div><span class="kpi-label">Dentro do Prazo</span></div>
-                        <div class="kpi-item"><div class="kpi-ring"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" fill="none" stroke="#1e1e2e" stroke-width="10"/><circle cx="60" cy="60" r="52" fill="none" stroke="url(#kpiGrad3)" stroke-width="10" stroke-dasharray="326.73" stroke-dashoffset="326.73" stroke-linecap="round" transform="rotate(-90 60 60)" class="kpi-progress" id="kpi-progress-tempo"/><defs><linearGradient id="kpiGrad3" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#fbbf24"/></linearGradient></defs></svg><span class="kpi-ring-value" id="kpi-value-tempo">0d</span></div><span class="kpi-label">Tempo Médio Resolução</span></div>
-                        <div class="kpi-item"><div class="kpi-ring"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" fill="none" stroke="#1e1e2e" stroke-width="10"/><circle cx="60" cy="60" r="52" fill="none" stroke="url(#kpiGrad4)" stroke-width="10" stroke-dasharray="326.73" stroke-dashoffset="326.73" stroke-linecap="round" transform="rotate(-90 60 60)" class="kpi-progress" id="kpi-progress-volume"/><defs><linearGradient id="kpiGrad4" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#ef4444"/><stop offset="100%" stop-color="#f87171"/></linearGradient></defs></svg><span class="kpi-ring-value" id="kpi-value-volume">0</span></div><span class="kpi-label">Volume Mensal</span></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
+        </main>
 
     <div class="modal-overlay" id="modal-overlay">
         <div class="modal" id="detail-modal">
