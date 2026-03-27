@@ -1,4 +1,5 @@
-import os
+from django.http import JsonResponse
+import requests
 from ninja import NinjaAPI, Schema
 from typing import List, Optional
 from .models import Chargeback
@@ -12,6 +13,18 @@ def ping(request):
     Acesse: https://[seu-dominio]/api/ping
     """
     return {"status": "OK", "message": "ChargeGuard API está online e pronta!"}
+
+@api.get("/cnpj/{cnpj}")
+def get_cnpj_info(request, cnpj: str):
+    """
+    Proxy para consulta de CNPJ via BrasilAPI (evita erro de CORS no frontend).
+    """
+    url = f"https://brasilapi.com.br/api/cnpj/v1/{cnpj}"
+    try:
+        response = requests.get(url, timeout=10)
+        return response.json()
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
 
 # Schemas (Pydantic models)
 class ClienteSchema(Schema):

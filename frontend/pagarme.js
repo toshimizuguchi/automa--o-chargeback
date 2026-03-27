@@ -677,8 +677,13 @@ function initCNPJLookup() {
         cnpjInput.classList.add('loading-field');
 
         try {
-            const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
-            if (!response.ok) throw new Error('CNPJ não encontrado ou erro na API');
+            // Chamada via backend (Proxy) para evitar erro de CORS
+            const backend = appConfig.backendUrl || '';
+            const baseUrl = backend.endsWith('/') ? backend.slice(0, -1) : backend;
+            const finalUrl = `${baseUrl}/api/cnpj/${cnpj}`;
+            
+            const response = await fetch(finalUrl);
+            if (!response.ok) throw new Error('CNPJ não encontrado ou erro no servidor');
             
             const data = await response.json();
             
