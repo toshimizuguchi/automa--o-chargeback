@@ -248,8 +248,8 @@ const PAGE_TITLES = {
 };
 
 function navigateToPage(pageName) {
-    navItems.forEach(item => item.classList.remove('active'));
-    pages.forEach(page => page.classList.remove('active'));
+    navItems.forEach(item1 => { if(item1) item1.classList.remove('active'); });
+    pages.forEach(page1 => { if(page1) page1.classList.remove('active'); });
 
     const activeNav = document.querySelector(`[data-page="${pageName}"]`);
     const activePage = document.getElementById(`page-${pageName}`);
@@ -259,18 +259,20 @@ function navigateToPage(pageName) {
 
     const info = PAGE_TITLES[pageName];
     if (info) {
-        pageTitle.textContent = info.title;
-        pageSubtitle.textContent = info.subtitle;
+        if (pageTitle) pageTitle.textContent = info.title;
+        if (pageSubtitle) pageSubtitle.textContent = info.subtitle;
     }
 
     // Render page-specific content
-    if (pageName === 'dashboard') renderDashboard();
-    if (pageName === 'casos') renderCasesTable();
-    if (pageName === 'fluxo') renderFlowPipeline();
+    if (pageName === 'dashboard' && typeof renderDashboard === 'function') renderDashboard();
+    if (pageName === 'casos' && typeof renderCasesTable === 'function') renderCasesTable();
+    if (pageName === 'fluxo' && typeof renderFlowPipeline === 'function') renderFlowPipeline();
 
     // Close sidebar on mobile
-    document.getElementById('sidebar').classList.remove('open');
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar) sidebar.classList.remove('open');
 }
+window.navigateToPage = navigateToPage;
 
 navItems.forEach(item => {
     item.addEventListener('click', (e) => {
