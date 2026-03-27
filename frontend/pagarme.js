@@ -6,7 +6,7 @@
 let appConfig = JSON.parse(localStorage.getItem('chargeguard_config') || 'null') || {
     profiles: [],
     currentProfileId: null,
-    apiKey: '', ambiente: 'test', 
+    apiKey: '', ambiente: 'test',
     backendUrl: '', // URL do Django API
     cgToken: '',    // Token de segurança do ChargeGuard
     autoAnalise: true, autoCarta: true, autoAlertaPrazo: true, autoEnvioPagarme: false, connected: false
@@ -119,14 +119,14 @@ window.addEventListener('DOMContentLoaded', () => {
 function initDefesaPage() {
     const select = document.getElementById('defesa-caso-select');
     if (!select) return;
-    
+
     // Carregar perfis de empresas disponíveis
     renderProfileSelector();
-    
+
     const activeCases = window.chargebacks.filter(c => !['ganho', 'perdido'].includes(c.status));
     select.innerHTML = '<option value="">Selecione um caso...</option>' +
         activeCases.map(c => `<option value="${c.id}">${c.id} — ${c.cliente.nome} — R$ ${c.transacao.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} (${MOTIVOS_MAP[c.motivo]})</option>`).join('');
-    
+
     select.onchange = () => {
         selectedDefesaCaseId = select.value;
         if (selectedDefesaCaseId) {
@@ -164,7 +164,7 @@ function renderProfileSelector() {
     const profiles = appConfig.profiles || [];
     select.innerHTML = '<option value="default">Padrão (Configurações)</option>' +
         profiles.map(p => `<option value="${p.id}">${p.empresa}</option>`).join('');
-    
+
     select.onchange = () => {
         const cb = window.chargebacks.find(c => c.id === selectedDefesaCaseId);
         if (cb) generateDefenseLetter(cb);
@@ -219,11 +219,11 @@ function updateSendButton(caseId) {
 function generateDefenseLetter(cb) {
     const body = document.getElementById('carta-body');
     if (!body) return;
-    
+
     // Pegar dados do perfil selecionado ou do padrão
     const perfilId = document.getElementById('defesa-perfil-select').value;
     let dados = { ...appConfig };
-    
+
     if (perfilId && perfilId !== 'default') {
         const perfil = appConfig.profiles.find(p => p.id === perfilId);
         if (perfil) dados = { ...perfil };
@@ -346,12 +346,12 @@ document.getElementById('btn-compilar-pdf').addEventListener('click', async (e) 
     // Evita propagação e execuções múltiplas
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!selectedDefesaCaseId) {
         showToast('error', 'Selecione um caso primeiro');
         return;
     }
-    
+
     if (this._isCompiling) return;
     this._isCompiling = true;
 
@@ -386,10 +386,10 @@ document.getElementById('btn-compilar-pdf').addEventListener('click', async (e) 
 async function generateFullPDF(cb, jspdfLib, pdflib, filesToProcess) {
     const { PDFDocument, rgb } = pdflib;
     const jsPDF = jspdfLib.jsPDF || jspdfLib;
-    
+
     // 1. Criar o PDF final (vazio)
     const mergedPdf = await PDFDocument.create();
-    
+
     // 2. Gerar a Carta de Defesa usando jsPDF e converter para bytes
     const doc = new jsPDF();
     const cartaText = document.getElementById('carta-body').textContent;
@@ -401,7 +401,7 @@ async function generateFullPDF(cb, jspdfLib, pdflib, filesToProcess) {
         if (y > 280) { doc.addPage(); y = 20; }
         doc.text(line, 15, y); y += 5;
     });
-    
+
     // Converter jsPDF para ArrayBuffer e carregar no PDF final
     const cartaBytes = doc.output('arraybuffer');
     const tempDoc = await PDFDocument.load(cartaBytes);
@@ -417,19 +417,19 @@ async function generateFullPDF(cb, jspdfLib, pdflib, filesToProcess) {
                 const attachmentDoc = await PDFDocument.load(fileBytes);
                 const pages = await mergedPdf.copyPages(attachmentDoc, attachmentDoc.getPageIndices());
                 pages.forEach(page => mergedPdf.addPage(page));
-            } 
+            }
             else if (file.type.startsWith('image/')) {
                 // Se for imagem, criar uma nova página e desenhar
                 const imageData = await file.arrayBuffer();
                 const page = mergedPdf.addPage([595.28, 841.89]); // A4 em pontos
-                
+
                 let image;
                 if (file.type === 'image/png') image = await mergedPdf.embedPng(imageData);
                 else image = await mergedPdf.embedJpg(imageData);
-                
+
                 const { width, height } = image.scale(1);
                 const dims = image.scale(Math.min(500 / width, 700 / height)); // Redimensionar para caber
-                
+
                 page.drawText(`EVIDÊNCIA: ${file.name}`, { x: 50, y: 800, size: 12 });
                 page.drawImage(image, {
                     x: 50,
@@ -499,7 +499,7 @@ document.getElementById('btn-enviar-pagarme').addEventListener('click', async ()
 
     const btn = document.getElementById('btn-enviar-pagarme');
     const pipeline = document.getElementById('simulation-pipeline');
-    
+
     btn.disabled = true;
     btn.innerHTML = '⏳ Iniciando Automação...';
     pipeline.style.display = 'block';
@@ -517,9 +517,9 @@ document.getElementById('btn-enviar-pagarme').addEventListener('click', async ()
         const stepEl = document.getElementById(`sim-step-${step.id}`);
         stepEl.classList.add('active');
         stepEl.querySelector('.sim-step-status').textContent = '🔄';
-        
+
         await new Promise(resolve => setTimeout(resolve, step.delay));
-        
+
         // Finalizar passo atual
         stepEl.classList.remove('active');
         stepEl.classList.add('success');
@@ -538,20 +538,20 @@ document.getElementById('btn-enviar-pagarme').addEventListener('click', async ()
     }
 
     notifications.unshift({
-        id: Date.now(), 
-        type: 'success', 
-        icon: '🚀', 
+        id: Date.now(),
+        type: 'success',
+        icon: '🚀',
         title: 'Defesa Transmitida (Simulação)',
-        text: `Caso ${cb.id} movido para disputa no gateway simulado.`, 
-        time: 'Agora', 
+        text: `Caso ${cb.id} movido para disputa no gateway simulado.`,
+        time: 'Agora',
         unread: true
     });
 
     if (window.updateNotificationBadge) window.updateNotificationBadge();
     showToast('success', `Simulação concluída! Caso ${cb.id} em disputa.`);
-    
+
     btn.innerHTML = '✅ Defesa Enviada (Sandbox)';
-    
+
     setTimeout(() => {
         pipeline.style.display = 'none';
         // Resetar steps para próxima vez
@@ -560,7 +560,7 @@ document.getElementById('btn-enviar-pagarme').addEventListener('click', async ()
             s.querySelector('.sim-step-status').textContent = '';
         });
         document.getElementById('sim-step-1').querySelector('.sim-step-status').textContent = '⏳';
-        
+
         btn.disabled = false;
         btn.innerHTML = '🚀 Enviar Defesa ao Pagar.me';
     }, 4000);
@@ -574,7 +574,7 @@ const defInput = document.getElementById('defesa-file-input');
 defUpload.addEventListener('click', () => defInput.click());
 defInput.addEventListener('change', (e) => {
     Array.from(e.target.files).forEach(f => defesaFiles.push(f));
-    renderDefesaFiles(); 
+    renderDefesaFiles();
     if (selectedDefesaCaseId) updateSendButton(selectedDefesaCaseId);
     // Limpa o input para permitir selecionar o mesmo arquivo se for removido e adicionado de novo
     e.target.value = '';
@@ -592,12 +592,12 @@ function loadConfig() {
     document.getElementById('config-ambiente') && (document.getElementById('config-ambiente').value = appConfig.ambiente);
     document.getElementById('config-backend-url') && (document.getElementById('config-backend-url').value = appConfig.backendUrl || '');
     document.getElementById('config-cg-token') && (document.getElementById('config-cg-token').value = appConfig.cgToken || '');
-    
+
     document.getElementById('auto-analise') && (document.getElementById('auto-analise').checked = appConfig.autoAnalise);
     document.getElementById('auto-carta') && (document.getElementById('auto-carta').checked = appConfig.autoCarta);
     document.getElementById('auto-alerta-prazo') && (document.getElementById('auto-alerta-prazo').checked = appConfig.autoAlertaPrazo);
     document.getElementById('auto-envio-pagarme') && (document.getElementById('auto-envio-pagarme').checked = appConfig.autoEnvioPagarme);
-    
+
     renderProfilesList();
     updateIntegrationBanner();
 }
@@ -605,13 +605,13 @@ function loadConfig() {
 function renderProfilesList() {
     const list = document.getElementById('profiles-list');
     if (!list) return;
-    
+
     const profiles = appConfig.profiles || [];
     if (profiles.length === 0) {
         list.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted); text-align:center; padding: 20px;">Nenhum perfil cadastrado. Adicione sua primeira empresa abaixo.</p>';
         return;
     }
-    
+
     list.innerHTML = profiles.map(p => `
         <div class="profile-card-item">
             <div class="profile-card-info">
@@ -629,17 +629,17 @@ function renderProfilesList() {
 function editProfile(id) {
     const profile = appConfig.profiles.find(p => p.id === id);
     if (!profile) return;
-    
+
     editingProfileId = id;
     document.getElementById('profile-editor-section').style.display = 'block';
-    
+
     document.getElementById('config-empresa').value = profile.empresa;
     document.getElementById('config-cnpj').value = profile.cnpj;
     document.getElementById('config-responsavel').value = profile.responsavel;
     document.getElementById('config-email-empresa').value = profile.emailEmpresa;
     document.getElementById('config-endereco').value = profile.endereco;
     document.getElementById('config-texto-extra').value = profile.textoExtra;
-    
+
     document.getElementById('profile-editor-section').scrollIntoView({ behavior: 'smooth' });
 }
 
@@ -655,7 +655,7 @@ function deleteProfile(id) {
 document.getElementById('btn-novo-perfil').addEventListener('click', () => {
     editingProfileId = 'new_' + Date.now();
     document.getElementById('profile-editor-section').style.display = 'block';
-    
+
     // Limpa campos
     document.getElementById('config-empresa').value = '';
     document.getElementById('config-cnpj').value = '';
@@ -663,7 +663,7 @@ document.getElementById('btn-novo-perfil').addEventListener('click', () => {
     document.getElementById('config-email-empresa').value = '';
     document.getElementById('config-endereco').value = '';
     document.getElementById('config-texto-extra').value = '';
-    
+
     document.getElementById('profile-editor-section').scrollIntoView({ behavior: 'smooth' });
 });
 
@@ -686,12 +686,12 @@ function initCNPJLookup() {
             const backend = appConfig.backendUrl || '';
             const baseUrl = backend.endsWith('/') ? backend.slice(0, -1) : backend;
             const finalUrl = `${baseUrl}/api/cnpj/${cnpj}`;
-            
+
             const response = await fetch(finalUrl);
             if (!response.ok) throw new Error('CNPJ não encontrado ou erro no servidor');
-            
+
             const data = await response.json();
-            
+
             // Se a API retornar erro no corpo mesmo com status 200 (alguns proxies) ou se faltar campo chave
             if (data.error || (!data.cnpj && !data.razao_social)) {
                 throw new Error(data.message || data.error || 'CNPJ não encontrado');
@@ -700,18 +700,18 @@ function initCNPJLookup() {
             // Preencher campos automaticamente (com fallback vazio para evitar 'undefined')
             const nome = data.razao_social || data.nome_fantasia || '';
             document.getElementById('config-empresa').value = nome;
-            
+
             if (data.email) {
                 document.getElementById('config-email-empresa').value = data.email;
             }
-            
+
             // Montar endereço de forma segura
             const parts = [];
             if (data.logradouro) parts.push(data.logradouro);
             if (data.numero) parts.push(data.numero);
             if (data.complemento) parts.push(data.complemento);
             if (data.bairro) parts.push(data.bairro);
-            
+
             let address = parts.join(', ');
             if (data.municipio) address += ` - ${data.municipio}`;
             if (data.uf) address += `/${data.uf}`;
@@ -720,7 +720,7 @@ function initCNPJLookup() {
             document.getElementById('config-endereco').value = address;
 
             showToast('success', '✅ Dados da empresa carregados!');
-            
+
             // Trigger visual feedback
             const editor = document.getElementById('profile-editor-section');
             editor.querySelectorAll('input').forEach(input => {
@@ -742,12 +742,12 @@ function initCNPJLookup() {
     cnpjInput.addEventListener('input', (e) => {
         let value = e.target.value.replace(/\D/g, '');
         if (value.length > 14) value = value.slice(0, 14);
-        
+
         if (value.length > 12) value = value.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2}).*/, '$1.$2.$3/$4-$5');
         else if (value.length > 8) value = value.replace(/^(\d{2})(\d{3})(\d{3})(\d{4}).*/, '$1.$2.$3/$4');
         else if (value.length > 5) value = value.replace(/^(\d{2})(\d{3})(\d{3}).*/, '$1.$2.$3');
         else if (value.length > 2) value = value.replace(/^(\d{2})(\d{3}).*/, '$1.$2');
-        
+
         e.target.value = value;
     });
 }
@@ -781,7 +781,7 @@ function saveConfig() {
             const idx = appConfig.profiles.findIndex(p => p.id === editingProfileId);
             if (idx !== -1) appConfig.profiles[idx] = profileData;
         }
-        
+
         editingProfileId = null;
         document.getElementById('profile-editor-section').style.display = 'none';
     }
