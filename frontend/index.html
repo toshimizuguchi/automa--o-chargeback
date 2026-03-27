@@ -232,6 +232,49 @@
                                 🚀 Enviar Defesa ao Pagar.me
                             </button>
                         </div>
+                        
+                        <!-- Simulation Pipeline -->
+                        <div class="simulation-pipeline" id="simulation-pipeline" style="display:none;">
+                            <div class="sim-header">
+                                <span>⚡ Modo Sandbox: Simulando Envio Automatizado</span>
+                                <div class="sim-dot-pulse"></div>
+                            </div>
+                            <div class="sim-steps">
+                                <div class="sim-step" id="sim-step-1">
+                                    <div class="sim-step-icon">🔍</div>
+                                    <div class="sim-step-content">
+                                        <h5>Coletando Metadados</h5>
+                                        <p>Buscando ID da transação e logs de acesso no servidor...</p>
+                                    </div>
+                                    <div class="sim-step-status">⏳</div>
+                                </div>
+                                <div class="sim-step" id="sim-step-2">
+                                    <div class="sim-step-icon">📄</div>
+                                    <div class="sim-step-content">
+                                        <h5>Compilando Dossiê</h5>
+                                        <p>Agrupando provas e gerando PDF final de defesa...</p>
+                                    </div>
+                                    <div class="sim-step-status"></div>
+                                </div>
+                                <div class="sim-step" id="sim-step-3">
+                                    <div class="sim-step-icon">🔐</div>
+                                    <div class="sim-step-content">
+                                        <h5>Autenticando API</h5>
+                                        <p>Estabelecendo conexão segura com o gateway Pagar.me...</p>
+                                    </div>
+                                    <div class="sim-step-status"></div>
+                                </div>
+                                <div class="sim-step" id="sim-step-4">
+                                    <div class="sim-step-icon">🚀</div>
+                                    <div class="sim-step-content">
+                                        <h5>Transmitindo Defesa</h5>
+                                        <p>Enviando pacote de provas via endpoint persistente...</p>
+                                    </div>
+                                    <div class="sim-step-status"></div>
+                                </div>
+                            </div>
+                        </div>
+
                         <p class="pagarme-hint">O PDF será gerado com a carta de defesa + todas as provas em ordem, nomeado pelo ID da transação.</p>
                     </div>
                 </div>

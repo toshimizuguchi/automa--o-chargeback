@@ -203,7 +203,7 @@ function updateSendButton(caseId) {
     const allDone = items.length > 0 && items.every(i => i.checked);
     const btn = document.getElementById('btn-enviar-pagarme');
     const docsCount = document.getElementById('pagarme-docs-count');
-    if (btn) btn.disabled = !allDone || !appConfig.connected;
+    if (btn) btn.disabled = !allDone; // Removido !appConfig.connected para permitir teste Sandbox
     if (docsCount) docsCount.textContent = `${defesaFiles.length} anexos + carta de defesa`;
     const apiStatus = document.getElementById('pagarme-api-status');
     if (apiStatus) {
@@ -491,26 +491,73 @@ document.getElementById('btn-gerar-carta').addEventListener('click', () => {
 // ============================================
 // ENVIO PAGAR.ME (SIMULADO)
 // ============================================
-document.getElementById('btn-enviar-pagarme').addEventListener('click', () => {
+document.getElementById('btn-enviar-pagarme').addEventListener('click', async () => {
     if (!selectedDefesaCaseId) return;
     const cb = window.chargebacks.find(c => c.id === selectedDefesaCaseId);
     if (!cb) return;
+
     const btn = document.getElementById('btn-enviar-pagarme');
-    btn.disabled = true; btn.innerHTML = '⏳ Enviando via API Pagar.me...';
+    const pipeline = document.getElementById('simulation-pipeline');
+    
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Iniciando Automação...';
+    pipeline.style.display = 'block';
+    pipeline.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    const steps = [
+        { id: 1, delay: 1500 },
+        { id: 2, delay: 2000 },
+        { id: 3, delay: 1500 },
+        { id: 4, delay: 2500 }
+    ];
+
+    for (const step of steps) {
+        // Ativar passo atual
+        const stepEl = document.getElementById(`sim-step-${step.id}`);
+        stepEl.classList.add('active');
+        stepEl.querySelector('.sim-step-status').textContent = '🔄';
+        
+        await new Promise(resolve => setTimeout(resolve, step.delay));
+        
+        // Finalizar passo atual
+        stepEl.classList.remove('active');
+        stepEl.classList.add('success');
+        stepEl.querySelector('.sim-step-status').textContent = '✅';
+    }
+
+    // Processamento concluído
+    cb.status = 'em-disputa';
+    cb.pagarmeDisputeId = 'sim_' + Math.random().toString(36).substr(2, 9).toUpperCase();
+    cb.historico.push({ data: new Date(), texto: `[MODO SANDBOX] Defesa enviada com sucesso. Mock ID: ${cb.pagarmeDisputeId}` });
+    cb.historico.push({ data: new Date(), texto: `Integração simulada: 4 anexos + carta compilada transmitidos.` });
+
+    notifications.unshift({
+        id: Date.now(), 
+        type: 'success', 
+        icon: '🚀', 
+        title: 'Defesa Transmitida (Simulação)',
+        text: `Caso ${cb.id} movido para disputa no gateway simulado.`, 
+        time: 'Agora', 
+        unread: true
+    });
+
+    if (window.updateNotificationBadge) window.updateNotificationBadge();
+    showToast('success', `Simulação concluída! Caso ${cb.id} em disputa.`);
+    
+    btn.innerHTML = '✅ Defesa Enviada (Sandbox)';
+    
     setTimeout(() => {
-        cb.status = 'em-disputa';
-        cb.pagarmeDisputeId = 'disp_' + Math.random().toString(36).substr(2, 16);
-        cb.historico.push({ data: new Date(), texto: `Defesa enviada via API Pagar.me (${appConfig.ambiente}). Dispute ID: ${cb.pagarmeDisputeId}` });
-        cb.historico.push({ data: new Date(), texto: 'Carta de defesa + evidências anexadas automaticamente.' });
-        notifications.unshift({
-            id: Date.now(), type: 'success', icon: '🚀', title: 'Defesa Enviada!',
-            text: `${cb.id} — Defesa enviada via Pagar.me. Dispute: ${cb.pagarmeDisputeId}`, time: 'Agora', unread: true
+        pipeline.style.display = 'none';
+        // Resetar steps para próxima vez
+        document.querySelectorAll('.sim-step').forEach(s => {
+            s.classList.remove('active', 'success');
+            s.querySelector('.sim-step-status').textContent = '';
         });
-        updateNotificationBadge();
-        showToast('success', `Defesa de ${cb.id} enviada com sucesso via Pagar.me!`);
-        btn.innerHTML = '✅ Defesa Enviada com Sucesso!';
-        setTimeout(() => { btn.disabled = false; btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Enviar Defesa ao Pagar.me'; }, 3000);
-    }, 2500);
+        document.getElementById('sim-step-1').querySelector('.sim-step-status').textContent = '⏳';
+        
+        btn.disabled = false;
+        btn.innerHTML = '🚀 Enviar Defesa ao Pagar.me';
+    }, 4000);
 });
 
 // ============================================
