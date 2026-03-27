@@ -533,10 +533,35 @@ document.getElementById('btn-enviar-pagarme').addEventListener('click', async ()
     setTimeout(() => {
         btn.disabled = false;
         btn.innerHTML = '🚀 Enviar Defesa ao Pagar.me';
+        
+        // Reiniciar formulário
+        resetDefesaForm();
+        
         if (window.navigateToPage) window.navigateToPage('casos');
         if (window.renderCasesTable) window.renderCasesTable();
     }, 800);
 });
+
+function resetDefesaForm() {
+    // 1. Limpar arquivos anexados
+    defesaFiles = [];
+    if (typeof renderDefesaFiles === 'function') renderDefesaFiles();
+
+    // 2. Desmarcar todos os checklists de documentos
+    document.querySelectorAll('.document-check input[type="checkbox"]').forEach(ck => ck.checked = false);
+
+    // 3. Resetar o seletor de caso e o estado de seleção
+    const select = document.getElementById('defesa-caso-select');
+    if (select) select.value = '';
+    selectedDefesaCaseId = null;
+
+    // 4. Limpar preview da carta
+    const body = document.getElementById('carta-body');
+    if (body) body.textContent = 'Aguardando seleção de caso...';
+
+    // 5. Atualizar o estado do botão
+    if (typeof updateSendButton === 'function') updateSendButton(null);
+}
 
 // ============================================
 // DEFESA FILE UPLOAD
