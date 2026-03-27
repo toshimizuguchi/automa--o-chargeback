@@ -1394,6 +1394,15 @@ async function checkAuthStatus() {
             if (overlay) overlay.style.display = 'flex';
             const app = document.getElementById('main-app-container');
             if (app) app.style.display = 'none';
+            
+            // Tentar preencher usuário lembrado
+            const remembered = localStorage.getItem('cg_remember_user');
+            if (remembered) {
+                const userField = document.getElementById('login-user');
+                const rememberCheck = document.getElementById('login-remember');
+                if (userField) userField.value = remembered;
+                if (rememberCheck) rememberCheck.checked = true;
+            }
         }
     } catch (err) {
         console.error('Erro ao verificar auth:', err);
@@ -1404,39 +1413,59 @@ async function handleLogin(e) {
     if (e) e.preventDefault();
     const user = document.getElementById('login-user').value;
     const pass = document.getElementById('login-pass').value;
+    const remember = document.getElementById('login-remember')?.checked;
     const btn = document.getElementById('btn-do-login');
+    const progressBar = document.getElementById('login-btn-progress');
+    const card = document.querySelector('.login-card');
 
     if (btn) {
         btn.disabled = true;
-        btn.textContent = 'Verificando...';
         btn.classList.add('loading');
+        if (progressBar) progressBar.style.width = '40%';
     }
 
     try {
         const backend = (typeof appConfig !== 'undefined' && appConfig.backendUrl) || '';
         const baseUrl = backend.endsWith('/') ? backend.slice(0, -1) : backend;
         
+        // Simular progresso
+        if (progressBar) {
+            setTimeout(() => { if(progressBar.style.width === '40%') progressBar.style.width = '70%'; }, 500);
+        }
+
         const response = await fetch(`${baseUrl}/api/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: user, password: pass })
+            body: JSON.stringify({ username: user, password: pass, remember: remember })
         });
 
         const data = await response.json();
 
         if (response.ok && data.status === 'success') {
-            showToast('success', `Bem-vindo, ${data.user}!`);
-            showApp(data.user);
+            if (progressBar) progressBar.style.width = '100%';
+            showToast('success', `Acesso autorizado! Bem-vindo, ${data.user}.`);
+            
+            if (remember) {
+                localStorage.setItem('cg_remember_user', user);
+            } else {
+                localStorage.removeItem('cg_remember_user');
+            }
+            
+            setTimeout(() => showApp(data.user), 500);
         } else {
-            showToast('error', data.message || 'Falha na autenticação');
+            if (progressBar) progressBar.style.width = '0%';
+            // Efeito de Erro
+            card?.classList.add('error-shake');
+            setTimeout(() => card?.classList.remove('error-shake'), 500);
+            showToast('error', data.message || 'Credenciais inválidas');
         }
     } catch (err) {
-        showToast('error', 'Erro de conexão com o servidor');
+        showToast('error', 'Erro de comunicação com o servidor');
     } finally {
         if (btn) {
             btn.disabled = false;
-            btn.textContent = 'Entrar no Sistema';
             btn.classList.remove('loading');
+            if (progressBar) setTimeout(() => progressBar.style.width = '0%', 1000);
         }
     }
 }
