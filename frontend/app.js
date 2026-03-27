@@ -1248,18 +1248,34 @@ async function exportDashboardToPDF() {
         doc.setFillColor(...darkColor);
         doc.rect(0, 0, 210, 45, 'F');
         
-        // Simular Logotipo
-        doc.setFillColor(...primaryColor);
-        doc.roundedRect(padding, 12, 12, 12, 3, 3, 'F');
+        // Carregar Logotipo Real
+        const logoImg = new Image();
+        logoImg.src = 'assets/logo.png';
+        await new Promise(resolve => {
+            logoImg.onload = resolve;
+            logoImg.onerror = () => {
+                console.warn('Erro ao carregar logo para o PDF, usando fallback.');
+                resolve(); // Resolve de qualquer forma para não travar
+            };
+        });
+
+        if (logoImg.complete && logoImg.naturalWidth > 0) {
+            doc.addImage(logoImg, 'PNG', padding, 10, 15, 15);
+        } else {
+            // Fallback se a imagem falhar
+            doc.setFillColor(...primaryColor);
+            doc.roundedRect(padding, 12, 12, 12, 3, 3, 'F');
+        }
+
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(22);
         doc.setFont('helvetica', 'bold');
-        doc.text('ChargeGuard Insights', padding + 16, 21);
+        doc.text('ChargeGuard Insights', padding + 18, 21);
         
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(10);
         doc.setTextColor(160, 160, 180);
-        doc.text('CONSOLIDAÇÃO OPERACIONAL E ANÁLISE DE RISCO', padding + 16, 26);
+        doc.text('CONSOLIDAÇÃO OPERACIONAL E ANÁLISE DE RISCO', padding + 18, 26);
         
         doc.setDrawColor(255, 255, 255, 0.1);
         doc.line(padding, 32, 195, 32);

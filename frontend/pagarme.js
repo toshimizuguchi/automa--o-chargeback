@@ -392,11 +392,29 @@ async function generateFullPDF(cb, jspdfLib, pdflib, filesToProcess) {
 
     // 2. Gerar a Carta de Defesa usando jsPDF e converter para bytes
     const doc = new jsPDF();
+    
+    // Carregar Logotipo Real
+    const logoImg = new Image();
+    logoImg.src = 'assets/logo.png';
+    await new Promise(resolve => {
+        logoImg.onload = resolve;
+        logoImg.onerror = () => resolve(); 
+    });
+
+    if (logoImg.complete && logoImg.naturalWidth > 0) {
+        doc.addImage(logoImg, 'PNG', 15, 10, 15, 15);
+        doc.setFontSize(16);
+        doc.setTextColor(99, 102, 241);
+        doc.setFont("helvetica", "bold");
+        doc.text("ChargeGuard — Defense Dossier", 35, 20);
+    }
+
     const cartaText = document.getElementById('carta-body').textContent;
     doc.setFont("courier", "normal");
     doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
     const lines = doc.splitTextToSize(cartaText, 180);
-    let y = 20;
+    let y = 35; // Começa mais abaixo por causa do logo
     lines.forEach(line => {
         if (y > 280) { doc.addPage(); y = 20; }
         doc.text(line, 15, y); y += 5;
