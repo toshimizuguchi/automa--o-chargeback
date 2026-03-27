@@ -14,6 +14,24 @@ def ping(request):
     """
     return {"status": "OK", "message": "ChargeGuard API está online e pronta!"}
 
+class UpdateStatusSchema(Schema):
+    status: str
+
+@api.patch("/chargebacks/{cb_id}")
+def update_chargeback_status(request, cb_id: str, data: UpdateStatusSchema):
+    """
+    Atualiza o status de um chargeback no banco de dados.
+    """
+    # Remove prefixo 'CB-' se vier do frontend
+    numeric_id = cb_id.replace('CB-', '')
+    try:
+        cb = Chargeback.objects.get(id_chargeback=numeric_id)
+        cb.status_processo = data.status
+        cb.save()
+        return {"status": "success", "new_status": cb.status_processo}
+    except Chargeback.DoesNotExist:
+        return JsonResponse({"error": "Chargeback não encontrado"}, status=404)
+
 @api.get("/cnpj/{cnpj}")
 def get_cnpj_info(request, cnpj: str):
     """

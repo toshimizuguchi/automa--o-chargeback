@@ -532,6 +532,11 @@ document.getElementById('btn-enviar-pagarme').addEventListener('click', async ()
     cb.historico.push({ data: new Date(), texto: `[MODO SANDBOX] Defesa enviada com sucesso. Mock ID: ${cb.pagarmeDisputeId}` });
     cb.historico.push({ data: new Date(), texto: `Integração simulada: 4 anexos + carta compilada transmitidos.` });
 
+    // Sincronizar com o Banco de Dados (Persistência)
+    if (window.syncStatusWithDB) {
+        window.syncStatusWithDB(cb.id, 'em-disputa');
+    }
+
     notifications.unshift({
         id: Date.now(), 
         type: 'success', 

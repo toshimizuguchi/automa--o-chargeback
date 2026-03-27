@@ -990,6 +990,29 @@ function maskName(name) {
 // ============================================
 // CASE ACTIONS
 // ============================================
+async function syncStatusWithDB(caseId, status) {
+    try {
+        const backend = (typeof appConfig !== 'undefined' && appConfig.backendUrl) || '';
+        const baseUrl = backend.endsWith('/') ? backend.slice(0, -1) : backend;
+        const finalUrl = `${baseUrl}/api/chargebacks/${caseId}`;
+
+        const response = await fetch(finalUrl, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: status })
+        });
+
+        if (!response.ok) {
+            console.error('Falha ao sincronizar status com o servidor');
+            return false;
+        }
+        return true;
+    } catch (err) {
+        console.error('Erro de conexão ao sincronizar status:', err);
+        return false;
+    }
+}
+
 function advanceCase(id) {
     const cb = chargebacks.find(c => c.id === id);
     if (!cb) return;
@@ -1029,6 +1052,9 @@ function advanceCase(id) {
 
     showToast('success', `${cb.id} avançou para "${STATUS_LABELS[next]}"`);
 
+    // Sincronizar com Banco de Dados sem travar a UI
+    syncStatusWithDB(cb.id, next);
+
     // Refresh current page
     const activePage = document.querySelector('.page.active');
     if (activePage) {
@@ -1060,6 +1086,10 @@ function markAsLost(id) {
     updateNotificationBadge();
 
     showToast('error', `${cb.id} marcado como perdido`);
+    
+    // Sincronizar com Banco de Dados
+    syncStatusWithDB(cb.id, 'perdido');
+
     closeModal();
 
     const activePage = document.querySelector('.page.active');
