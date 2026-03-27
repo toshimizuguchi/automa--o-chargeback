@@ -1236,69 +1236,137 @@ async function exportDashboardToPDF() {
     const doc = new jsPDF('p', 'mm', 'a4');
     const padding = 15;
     
-    showToast('info', 'Gerando relatório executivo PDF...');
+    showToast('info', 'Gerando relatório PDF de alta fidelidade...');
     
     try {
-        // Estilo Cabeçalho
-        doc.setFillColor(20, 20, 30); // Dark theme
-        doc.rect(0, 0, 210, 35, 'F');
+        const primaryColor = [99, 102, 241]; // Indigo 500
+        const darkColor = [20, 20, 30];      // App dark
         
+        // 1. HEADER REQUINTADO
+        doc.setFillColor(...darkColor);
+        doc.rect(0, 0, 210, 45, 'F');
+        
+        // Simular Logotipo
+        doc.setFillColor(...primaryColor);
+        doc.roundedRect(padding, 12, 12, 12, 3, 3, 'F');
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(22);
-        doc.text('ChargeGuard Insights', padding, 20);
+        doc.setFont('helvetica', 'bold');
+        doc.text('ChargeGuard Insights', padding + 16, 21);
+        
+        doc.setFont('helvetica', 'normal');
         doc.setFontSize(10);
-        doc.text(`Relatório Gerado em: ${new Date().toLocaleString()}`, padding, 28);
+        doc.setTextColor(160, 160, 180);
+        doc.text('CONSOLIDAÇÃO OPERACIONAL E ANÁLISE DE RISCO', padding + 16, 26);
         
-        // Sumário de Métricas
-        doc.setTextColor(40, 40, 60);
-        doc.setFontSize(14);
-        doc.text('Resumo Executivo (Métricas Atuais)', padding, 50);
+        doc.setDrawColor(255, 255, 255, 0.1);
+        doc.line(padding, 32, 195, 32);
         
-        doc.setDrawColor(230, 230, 235);
-        doc.line(padding, 52, 195, 52);
-        
-        doc.setFontSize(11);
-        const mTotal = document.getElementById('metric-total-value')?.textContent || '0';
-        const mDisputa = document.getElementById('metric-disputa-value')?.textContent || '0';
-        const mValor = document.getElementById('metric-recuperado-value')?.textContent || 'R$ 0';
-        const mTaxa = document.getElementById('metric-taxa-value')?.textContent || '0%';
+        const mUser = document.querySelector('.user-name')?.textContent || 'Administrador';
+        doc.text(`Responsável: ${mUser}`, padding, 39);
+        doc.text(`Data: ${new Date().toLocaleString('pt-BR')}`, 195, 39, { align: 'right' });
 
-        doc.text(`Total de Chargebacks: ${mTotal}`, padding, 62);
-        doc.text(`Casos em Disputa: ${mDisputa}`, padding + 80, 62);
-        doc.text(`Valor Total Recuperado: ${mValor}`, padding, 70);
-        doc.text(`Taxa média de Sucesso: ${mTaxa}`, padding + 80, 70);
+        // 2. MÉTRICAS EM CARDS
+        let currentY = 55;
+        doc.setTextColor(...darkColor);
+        doc.setFontSize(13);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Indicadores Chave de Performance (KPIs)', padding, currentY);
+        
+        const metrics = [
+            { l: 'Total Casos', v: document.getElementById('metric-total-value')?.textContent || '0' },
+            { l: 'Em Disputa', v: document.getElementById('metric-disputa-value')?.textContent || '0' },
+            { l: 'Recuperado', v: document.getElementById('metric-recuperado-value')?.textContent || 'R$ 0' },
+            { l: 'Sucesso (%)', v: document.getElementById('metric-taxa-value')?.textContent || '0%' }
+        ];
 
-        // Gráficos
-        let currentY = 85;
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        
+        metrics.forEach((m, i) => {
+            const x = padding + (i * 46);
+            doc.setFillColor(248, 249, 252);
+            doc.roundedRect(x, currentY + 5, 42, 22, 2, 2, 'F');
+            doc.setTextColor(120, 120, 140);
+            doc.text(m.l.toUpperCase(), x + 3, currentY + 11);
+            doc.setTextColor(...primaryColor);
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'bold');
+            doc.text(m.v, x + 3, currentY + 22);
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'normal');
+        });
+        
+        currentY += 35;
+
+        // 3. GRÁFICO TIGHLINE
         const timelineCanvas = document.getElementById('timeline-chart');
-        const reasonsCanvas = document.getElementById('reasons-chart');
-
         if (timelineCanvas) {
+            doc.setTextColor(...darkColor);
             doc.setFontSize(13);
-            doc.text('Tendência Temporal (Chargebacks)', padding, currentY);
-            const imgData = timelineCanvas.toDataURL('image/png');
-            // Proporção do chart original
-            doc.addImage(imgData, 'PNG', padding, currentY + 5, 175, 75);
-            currentY += 95;
+            doc.setFont('helvetica', 'bold');
+            doc.text('Tendência de Ocorrências (Últimos Períodos)', padding, currentY);
+            
+            const imgData = timelineCanvas.toDataURL('image/png', 1.0);
+            doc.setDrawColor(240, 240, 245);
+            doc.rect(padding - 1, currentY + 4, 182, 72); 
+            doc.addImage(imgData, 'PNG', padding, currentY + 5, 180, 70);
+            currentY += 88;
         }
 
-        if (reasonsCanvas) {
-            doc.setFontSize(13);
-            doc.text('Detalhamento por Motivo', padding, currentY);
-            const imgData = reasonsCanvas.toDataURL('image/png');
-            doc.addImage(imgData, 'PNG', padding, currentY + 5, 100, 80);
+        // 4. TABELA DE CASOS RECENTES 
+        doc.setFontSize(13);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(...darkColor);
+        doc.text('Monitoramento de Casos Recentes', padding, currentY);
+        
+        const tableData = [];
+        const rows = document.querySelectorAll('#recent-cases-body tr');
+        rows.forEach(row => {
+            const cols = row.querySelectorAll('td');
+            if (cols.length >= 6) {
+                tableData.push([
+                    cols[0].innerText, // ID
+                    cols[1].innerText, // Cliente
+                    cols[2].innerText, // Valor
+                    cols[3].innerText, // Motivo
+                    cols[4].innerText, // Status
+                    cols[5].innerText  // Prazo
+                ]);
+            }
+        });
+
+        if (doc.autoTable) {
+            doc.autoTable({
+                startY: currentY + 5,
+                head: [['ID', 'Cliente', 'Valor', 'Motivo', 'Status', 'Prazo']],
+                body: tableData,
+                theme: 'striped',
+                headStyles: { fillColor: primaryColor, textColor: 255, fontSize: 10, halign: 'center' },
+                styles: { fontSize: 8.5, cellPadding: 3, valign: 'middle' },
+                columnStyles: { 
+                    0: { fontStyle: 'bold', textColor: primaryColor },
+                    2: { halign: 'right' },
+                    4: { halign: 'center' }
+                },
+                margin: { left: padding, right: padding }
+            });
         }
 
-        // Rodapé
-        doc.setFontSize(8);
-        doc.setTextColor(150, 150, 150);
-        doc.text('ChargeGuard Operations Console — Relatório Automatizado Confidencial', 105, 285, { align: 'center' });
+        // 5. RODAPÉ
+        const totalPages = doc.internal.getNumberOfPages();
+        for(let i = 1; i <= totalPages; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(180, 180, 190);
+            doc.text(`ChargeGuard Executive Insights — Página ${i} de ${totalPages}`, 105, 290, { align: 'center' });
+        }
 
-        doc.save(`ChargeGuard_Report_${Date.now()}.pdf`);
-        showToast('success', 'Relatório PDF gerado com sucesso!');
+        doc.save(`ChargeGuard_Executive_Report_${Date.now()}.pdf`);
+        showToast('success', 'Relatório PDF executivo exportado!');
     } catch (err) {
-        console.error('Erro PDF:', err);
-        showToast('error', 'Ocorreu um erro ao gerar o PDF. Tente novamente.');
+        console.error('Erro PDF Detalhado:', err);
+        showToast('error', 'Falha ao renderizar PDF: ' + err.message);
     }
 }
 
