@@ -547,19 +547,37 @@ function resetDefesaForm() {
     defesaFiles = [];
     if (typeof renderDefesaFiles === 'function') renderDefesaFiles();
 
-    // 2. Desmarcar todos os checklists de documentos
-    document.querySelectorAll('.document-check input[type="checkbox"]').forEach(ck => ck.checked = false);
+    // 2. Resetar o estado do checklist interno para o caso atual
+    if (selectedDefesaCaseId && checklistStates[selectedDefesaCaseId]) {
+        checklistStates[selectedDefesaCaseId].forEach(item => item.checked = false);
+    }
 
-    // 3. Resetar o seletor de caso e o estado de seleção
+    // 3. Resetar UI do Checklist
+    const done = document.getElementById('checklist-done');
+    const bar = document.getElementById('checklist-bar-fill');
+    if (done) done.textContent = '0';
+    if (bar) bar.style.width = '0%';
+    const checklistItems = document.getElementById('checklist-items');
+    if (checklistItems) checklistItems.innerHTML = '';
+
+    // 4. Resetar o seletor de caso e o estado de seleção
     const select = document.getElementById('defesa-caso-select');
     if (select) select.value = '';
-    selectedDefesaCaseId = null;
-
-    // 4. Limpar preview da carta
+    
+    // 5. Limpar preview da carta
     const body = document.getElementById('carta-body');
     if (body) body.textContent = 'Aguardando seleção de caso...';
 
-    // 5. Atualizar o estado do botão
+    // 6. Esconder painéis de configuração (Reset visual total)
+    const checklistCard = document.getElementById('checklist-card');
+    const pagarmeCard = document.getElementById('pagarme-send-card');
+    const cartaCard = document.getElementById('carta-defesa-card');
+    if (checklistCard) checklistCard.style.display = 'none';
+    if (pagarmeCard) pagarmeCard.style.display = 'none';
+    if (cartaCard) cartaCard.style.display = 'none';
+
+    // 7. Atualizar o estado do botão para desativado
+    selectedDefesaCaseId = null;
     if (typeof updateSendButton === 'function') updateSendButton(null);
 }
 
