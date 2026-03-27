@@ -1400,8 +1400,13 @@ async function checkAuthStatus() {
             if (remembered) {
                 const userField = document.getElementById('login-user');
                 const rememberCheck = document.getElementById('login-remember');
+                const headerP = document.querySelector('.login-header p');
+                
                 if (userField) userField.value = remembered;
                 if (rememberCheck) rememberCheck.checked = true;
+                if (headerP) {
+                    headerP.innerHTML = `<span style="color:var(--indigo-400); font-weight:600;">Bem-vindo de volta, ${remembered}!</span>`;
+                }
             }
         }
     } catch (err) {

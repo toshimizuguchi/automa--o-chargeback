@@ -563,6 +563,9 @@ document.getElementById('btn-enviar-pagarme').addEventListener('click', async ()
 
         btn.disabled = false;
         btn.innerHTML = '🚀 Enviar Defesa ao Pagar.me';
+        
+        // Redireciona de volta para a central de operações
+        if (window.navigateToPage) window.navigateToPage('casos');
     }, 4000);
 });
 
