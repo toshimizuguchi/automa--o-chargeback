@@ -1228,6 +1228,82 @@ window.exportToExcel = function() {
     showToast('success', 'Relatório Excel exportado com sucesso!');
 };
 
+// ============================================
+// PDF REPORT EXPORT
+// ============================================
+async function exportDashboardToPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const padding = 15;
+    
+    showToast('info', 'Gerando relatório executivo PDF...');
+    
+    try {
+        // Estilo Cabeçalho
+        doc.setFillColor(20, 20, 30); // Dark theme
+        doc.rect(0, 0, 210, 35, 'F');
+        
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(22);
+        doc.text('ChargeGuard Insights', padding, 20);
+        doc.setFontSize(10);
+        doc.text(`Relatório Gerado em: ${new Date().toLocaleString()}`, padding, 28);
+        
+        // Sumário de Métricas
+        doc.setTextColor(40, 40, 60);
+        doc.setFontSize(14);
+        doc.text('Resumo Executivo (Métricas Atuais)', padding, 50);
+        
+        doc.setDrawColor(230, 230, 235);
+        doc.line(padding, 52, 195, 52);
+        
+        doc.setFontSize(11);
+        const mTotal = document.getElementById('metric-total-value')?.textContent || '0';
+        const mDisputa = document.getElementById('metric-disputa-value')?.textContent || '0';
+        const mValor = document.getElementById('metric-recuperado-value')?.textContent || 'R$ 0';
+        const mTaxa = document.getElementById('metric-taxa-value')?.textContent || '0%';
+
+        doc.text(`Total de Chargebacks: ${mTotal}`, padding, 62);
+        doc.text(`Casos em Disputa: ${mDisputa}`, padding + 80, 62);
+        doc.text(`Valor Total Recuperado: ${mValor}`, padding, 70);
+        doc.text(`Taxa média de Sucesso: ${mTaxa}`, padding + 80, 70);
+
+        // Gráficos
+        let currentY = 85;
+        const timelineCanvas = document.getElementById('timeline-chart');
+        const reasonsCanvas = document.getElementById('reasons-chart');
+
+        if (timelineCanvas) {
+            doc.setFontSize(13);
+            doc.text('Tendência Temporal (Chargebacks)', padding, currentY);
+            const imgData = timelineCanvas.toDataURL('image/png');
+            // Proporção do chart original
+            doc.addImage(imgData, 'PNG', padding, currentY + 5, 175, 75);
+            currentY += 95;
+        }
+
+        if (reasonsCanvas) {
+            doc.setFontSize(13);
+            doc.text('Detalhamento por Motivo', padding, currentY);
+            const imgData = reasonsCanvas.toDataURL('image/png');
+            doc.addImage(imgData, 'PNG', padding, currentY + 5, 100, 80);
+        }
+
+        // Rodapé
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        doc.text('ChargeGuard Operations Console — Relatório Automatizado Confidencial', 105, 285, { align: 'center' });
+
+        doc.save(`ChargeGuard_Report_${Date.now()}.pdf`);
+        showToast('success', 'Relatório PDF gerado com sucesso!');
+    } catch (err) {
+        console.error('Erro PDF:', err);
+        showToast('error', 'Ocorreu um erro ao gerar o PDF. Tente novamente.');
+    }
+}
+
+document.getElementById('btn-export-pdf')?.addEventListener('click', exportDashboardToPDF);
+
 // "Ver todos" button
 document.getElementById('btn-ver-todos')?.addEventListener('click', () => {
     navigateToPage('casos');
