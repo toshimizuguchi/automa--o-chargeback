@@ -216,6 +216,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Inicializar listeners dos filtros e busca
     initCasesListeners();
+    // Inicializar listeners do Dashboard (Gráficos)
+    initDashboardListeners();
 });
 
 // ============================================
@@ -316,7 +318,10 @@ function animateCounter(elementId, target) {
     }, 30);
 }
 
-function renderTimelineChart() {
+let currentTimelineDays = 7;
+
+function renderTimelineChart(daysCount = currentTimelineDays) {
+    currentTimelineDays = daysCount;
     const canvas = document.getElementById('timeline-chart');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -326,18 +331,31 @@ function renderTimelineChart() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Calcula dados reais dos últimos 7 dias
+    // Calcula dados reais baseado no período selecionado
     const days = [];
     const values = [];
     const now = new Date();
-    for (let i = 6; i >= 0; i--) {
+    
+    // Para 90 dias, agrupamos por semana ou mostramos menos labels para não poluir
+    const step = daysCount > 30 ? 7 : (daysCount > 7 ? 3 : 1);
+
+    for (let i = daysCount - 1; i >= 0; i--) {
         const d = new Date(now);
         d.setDate(d.getDate() - i);
+        
+        // Label formatada: ex "27 Mar"
         const dayLabel = d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
-        days.push(dayLabel);
+        
+        // Só adiciona label ao array de labels visíveis conforme o step
+        if (i % step === 0 || i === 0 || i === daysCount - 1) {
+            days.push(dayLabel);
+        } else {
+            days.push("");
+        }
         
         // Conta casos recebidos neste dia
         const count = window.chargebacks.filter(c => {
+            if (!c.dataRecebimento) return false;
             const dateC = new Date(c.dataRecebimento);
             return dateC.getDate() === d.getDate() && 
                    dateC.getMonth() === d.getMonth() && 
@@ -397,16 +415,19 @@ function renderTimelineChart() {
     ctx.lineWidth = 2.5;
     ctx.stroke();
 
-    // Dots
-    points.forEach(p => {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
-        ctx.fillStyle = '#6366f1';
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
-        ctx.fillStyle = '#fff';
-        ctx.fill();
+    // Dots (Show fewer dots for longer periods)
+    points.forEach((p, i) => {
+        // Só desenha o ponto se houver uma label correspondente ou se for poucos dias
+        if (days[i] !== "" || daysCount <= 14) {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
+            ctx.fillStyle = '#6366f1';
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 1.8, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff';
+            ctx.fill();
+        }
     });
 
     // X Labels
@@ -486,6 +507,21 @@ function renderReasonsChart() {
     ctx.fillStyle = '#6b7280';
     ctx.font = '11px Inter';
     ctx.fillText('Total', centerX, centerY + 12);
+}
+
+function initDashboardListeners() {
+    // Listeners para os botões de período do gráfico de Timeline
+    document.querySelectorAll('.chart-btn[data-period]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            // Remove active de todos os botões do mesmo grupo
+            btn.parentElement.querySelectorAll('.chart-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // Extrai o número de dias do data-period (ex: "30d" -> 30)
+            const days = parseInt(btn.dataset.period);
+            renderTimelineChart(days);
+        });
+    });
 }
 
 function renderRecentCases() {
