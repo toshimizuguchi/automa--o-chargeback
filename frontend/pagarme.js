@@ -110,6 +110,7 @@ window.addEventListener('DOMContentLoaded', () => {
     loadConfig();
     updatePagarmeStatus();
     patchCasesTable();
+    initCNPJLookup();
 });
 
 // ============================================
@@ -660,6 +661,66 @@ document.getElementById('btn-novo-perfil').addEventListener('click', () => {
     
     document.getElementById('profile-editor-section').scrollIntoView({ behavior: 'smooth' });
 });
+
+// ============================================
+// CNPJ AUTO-LOOKUP (BrasilAPI)
+// ============================================
+function initCNPJLookup() {
+    const cnpjInput = document.getElementById('config-cnpj');
+    if (!cnpjInput) return;
+
+    cnpjInput.addEventListener('blur', async () => {
+        const cnpj = cnpjInput.value.replace(/\D/g, '');
+        if (cnpj.length !== 14) return;
+
+        showToast('info', '🔍 Buscando dados da empresa...');
+        cnpjInput.classList.add('loading-field');
+
+        try {
+            const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
+            if (!response.ok) throw new Error('CNPJ não encontrado ou erro na API');
+            
+            const data = await response.json();
+            
+            // Preencher campos automaticamente
+            document.getElementById('config-empresa').value = data.razao_social || data.nome_fantasia || '';
+            document.getElementById('config-email-empresa').value = data.email || '';
+            
+            const address = `${data.logradouro}, ${data.numero}${data.complemento ? ' - ' + data.complemento : ''}, ${data.bairro}, ${data.municipio} - ${data.uf}, CEP ${data.cep}`;
+            document.getElementById('config-endereco').value = address;
+
+            showToast('success', '✅ Dados da empresa preenchidos!');
+            
+            // Trigger visual feedback
+            const editor = document.getElementById('profile-editor-section');
+            editor.querySelectorAll('input').forEach(input => {
+                if (input.value && input.id !== 'config-cnpj') {
+                    input.style.borderColor = 'var(--green-400)';
+                    setTimeout(() => input.style.borderColor = '', 2000);
+                }
+            });
+
+        } catch (err) {
+            console.error('Erro na busca de CNPJ:', err);
+            showToast('warning', '⚠️ Não foi possível puxar os dados automaticamente. Preencha manualmente.');
+        } finally {
+            cnpjInput.classList.remove('loading-field');
+        }
+    });
+
+    // Simple mask for CNPJ
+    cnpjInput.addEventListener('input', (e) => {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length > 14) value = value.slice(0, 14);
+        
+        if (value.length > 12) value = value.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2}).*/, '$1.$2.$3/$4-$5');
+        else if (value.length > 8) value = value.replace(/^(\d{2})(\d{3})(\d{3})(\d{4}).*/, '$1.$2.$3/$4');
+        else if (value.length > 5) value = value.replace(/^(\d{2})(\d{3})(\d{3}).*/, '$1.$2.$3');
+        else if (value.length > 2) value = value.replace(/^(\d{2})(\d{3}).*/, '$1.$2');
+        
+        e.target.value = value;
+    });
+}
 
 function saveConfig() {
     // API Keys e Globais

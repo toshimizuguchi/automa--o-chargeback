@@ -2418,6 +2418,18 @@ body {
     font-size: 0.9rem;
 }
 
+.loading-field {
+    border-color: var(--indigo-500) !important;
+    background: rgba(99, 102, 241, 0.05) !important;
+    animation: field-pulse 1.5s infinite;
+}
+
+@keyframes field-pulse {
+    0% { opacity: 0.7; }
+    50% { opacity: 1; }
+    100% { opacity: 0.7; }
+}
+
 @media (max-width: 1300px) {
     .op-main-grid { 
         grid-template-columns: 1fr; 
