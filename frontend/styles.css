@@ -571,6 +571,9 @@ body {
 
 .cases-table-container {
     overflow-x: auto;
+    width: 100%;
+    position: relative;
+    -webkit-overflow-scrolling: touch;
 }
 
 .cases-table {
@@ -2278,7 +2281,7 @@ body {
 /* Ajustado para 260px (era 280px) para dar mais espaço */
 .op-main-grid { 
     display: grid; 
-    grid-template-columns: 1fr 260px; 
+    grid-template-columns: minmax(0, 1fr) 260px; 
     gap: 20px; 
     align-items: start;
     width: 100%;

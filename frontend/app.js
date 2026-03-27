@@ -593,8 +593,13 @@ function renderCasesTable(filter = currentFilter) {
             <td>${MOTIVOS_MAP[c.motivo] || c.motivo}</td>
             <td>${BANDEIRAS_MAP[c.transacao.bandeira] || c.transacao.bandeira}</td>
             <td>${getStatusBadge(c.status)}</td>
+            <td>
+                <div class="proof-indicator">
+                    <div class="proof-bar"><div class="proof-bar-fill low" style="width: 0%"></div></div>
+                    <span class="proof-text">0%</span>
+                </div>
+            </td>
             <td>${getPrazoDisplay(c.prazo)}</td>
-            <td>${getEtapaDisplay(c.status)}</td>
             <td>
                 <div style="display: flex; gap: 6px;">
                     <button class="action-btn" onclick="openCaseDetail('${c.id}')" title="Ver detalhes">
@@ -936,7 +941,8 @@ function animateKPIRing(progressId, valueId, percentage, suffix, displayValue) {
 // HELPERS
 // ============================================
 function getStatusBadge(status) {
-    return `<span class="status-badge ${status}"><span class="dot"></span>${STATUS_LABELS[status]}</span>`;
+    const label = STATUS_LABELS[status] || (status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Recebido');
+    return `<span class="status-badge ${status}"><span class="dot"></span>${label}</span>`;
 }
 
 function getPrazoDisplay(prazo) {
