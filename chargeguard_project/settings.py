@@ -23,7 +23,6 @@ load_dotenv(BASE_DIR / ".env")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
-
 # SEGURANÇA: Chave secreta no .env. Nunca compartilhe esta chave publicamente.
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "django-insecure-default-development-key")
 
