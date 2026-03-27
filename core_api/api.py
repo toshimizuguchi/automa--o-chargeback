@@ -22,7 +22,8 @@ def get_cnpj_info(request, cnpj: str):
     url = f"https://brasilapi.com.br/api/cnpj/v1/{cnpj}"
     try:
         response = requests.get(url, timeout=10)
-        return response.json()
+        # Retorna o JSON da BrasilAPI com o mesmo status code original (ex: 404 se não achar)
+        return JsonResponse(response.json(), status=response.status_code, safe=False)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 

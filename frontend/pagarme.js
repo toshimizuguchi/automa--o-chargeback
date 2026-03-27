@@ -687,14 +687,34 @@ function initCNPJLookup() {
             
             const data = await response.json();
             
-            // Preencher campos automaticamente
-            document.getElementById('config-empresa').value = data.razao_social || data.nome_fantasia || '';
-            document.getElementById('config-email-empresa').value = data.email || '';
+            // Se a API retornar erro no corpo mesmo com status 200 (alguns proxies) ou se faltar campo chave
+            if (data.error || (!data.cnpj && !data.razao_social)) {
+                throw new Error(data.message || data.error || 'CNPJ não encontrado');
+            }
+
+            // Preencher campos automaticamente (com fallback vazio para evitar 'undefined')
+            const nome = data.razao_social || data.nome_fantasia || '';
+            document.getElementById('config-empresa').value = nome;
             
-            const address = `${data.logradouro}, ${data.numero}${data.complemento ? ' - ' + data.complemento : ''}, ${data.bairro}, ${data.municipio} - ${data.uf}, CEP ${data.cep}`;
+            if (data.email) {
+                document.getElementById('config-email-empresa').value = data.email;
+            }
+            
+            // Montar endereço de forma segura
+            const parts = [];
+            if (data.logradouro) parts.push(data.logradouro);
+            if (data.numero) parts.push(data.numero);
+            if (data.complemento) parts.push(data.complemento);
+            if (data.bairro) parts.push(data.bairro);
+            
+            let address = parts.join(', ');
+            if (data.municipio) address += ` - ${data.municipio}`;
+            if (data.uf) address += `/${data.uf}`;
+            if (data.cep) address += `, CEP ${data.cep}`;
+
             document.getElementById('config-endereco').value = address;
 
-            showToast('success', '✅ Dados da empresa preenchidos!');
+            showToast('success', '✅ Dados da empresa carregados!');
             
             // Trigger visual feedback
             const editor = document.getElementById('profile-editor-section');
