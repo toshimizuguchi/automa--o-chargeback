@@ -541,10 +541,6 @@ function renderRecentCases() {
                 <button class="action-btn" onclick="openCaseDetail('${c.id}')" title="Ver detalhes">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                 </button>
-                ${c.status !== 'ganho' && c.status !== 'perdido' ? `
-                <button class="action-btn advance" onclick="advanceCase('${c.id}')" title="Avançar etapa">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-                </button>` : ''}
             </td>
         </tr>
     `).join('');

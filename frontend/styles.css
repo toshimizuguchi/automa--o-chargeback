@@ -2290,6 +2290,7 @@ body {
     border-radius: 16px; 
     padding: 20px;
     min-width: 0;
+    overflow: hidden; /* Garante que a tabela interna use o scrollbar dela */
 }
 
 .op-activity-panel { 
@@ -2327,7 +2328,12 @@ body {
     word-break: break-all;
 }
 
-@media (max-width: 1200px) {
-    .op-main-grid { grid-template-columns: 1fr; margin-right: 0; }
-    .op-activity-panel { margin-right: 0; }
+@media (max-width: 1300px) {
+    .op-main-grid { 
+        grid-template-columns: 1fr; 
+    }
+    .op-activity-panel { 
+        max-width: 100%;
+        margin-right: 0; 
+    }
 }
