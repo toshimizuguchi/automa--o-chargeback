@@ -1,3 +1,4 @@
+from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
 import requests
 from ninja import NinjaAPI, Schema
@@ -13,6 +14,38 @@ def ping(request):
     Acesse: https://[seu-dominio]/api/ping
     """
     return {"status": "OK", "message": "ChargeGuard API está online e pronta!"}
+
+class LoginSchema(Schema):
+    username: str
+    password: str
+
+@api.post("/login")
+def auth_login(request, data: LoginSchema):
+    """
+    Realiza o login interno.
+    """
+    user = authenticate(username=data.username, password=data.password)
+    if user:
+        login(request, user)
+        return {"status": "success", "user": user.username}
+    return JsonResponse({"status": "error", "message": "Credenciais inválidas"}, status=401)
+
+@api.get("/check-auth")
+def check_auth(request):
+    """
+    Verifica se o usuário já possui uma sessão ativa.
+    """
+    if request.user.is_authenticated:
+        return {"authenticated": True, "user": request.user.username}
+    return {"authenticated": False}
+
+@api.post("/logout")
+def auth_logout(request):
+    """
+    Encerra a sessão.
+    """
+    logout(request)
+    return {"status": "success"}
 
 class UpdateStatusSchema(Schema):
     status: str

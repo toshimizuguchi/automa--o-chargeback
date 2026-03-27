@@ -1496,6 +1496,101 @@ document.getElementById('btn-ver-todos')?.addEventListener('click', () => {
 });
 
 // ============================================
+// AUTHENTICATION LOGIC
+// ============================================
+async function checkAuthStatus() {
+    try {
+        const backend = (typeof appConfig !== 'undefined' && appConfig.backendUrl) || '';
+        const baseUrl = backend.endsWith('/') ? backend.slice(0, -1) : backend;
+        const response = await fetch(`${baseUrl}/api/check-auth`);
+        const data = await response.json();
+
+        if (data.authenticated) {
+            showApp(data.user);
+        } else {
+            const overlay = document.getElementById('login-overlay');
+            if (overlay) overlay.style.display = 'flex';
+            const app = document.getElementById('main-app-container');
+            if (app) app.style.display = 'none';
+        }
+    } catch (err) {
+        console.error('Erro ao verificar auth:', err);
+    }
+}
+
+async function handleLogin(e) {
+    if (e) e.preventDefault();
+    const user = document.getElementById('login-user').value;
+    const pass = document.getElementById('login-pass').value;
+    const btn = document.getElementById('btn-do-login');
+
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Verificando...';
+        btn.classList.add('loading');
+    }
+
+    try {
+        const backend = (typeof appConfig !== 'undefined' && appConfig.backendUrl) || '';
+        const baseUrl = backend.endsWith('/') ? backend.slice(0, -1) : backend;
+        
+        const response = await fetch(`${baseUrl}/api/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: user, password: pass })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.status === 'success') {
+            showToast('success', `Bem-vindo, ${data.user}!`);
+            showApp(data.user);
+        } else {
+            showToast('error', data.message || 'Falha na autenticação');
+        }
+    } catch (err) {
+        showToast('error', 'Erro de conexão com o servidor');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = 'Entrar no Sistema';
+            btn.classList.remove('loading');
+        }
+    }
+}
+
+function showApp(username) {
+    const overlay = document.getElementById('login-overlay');
+    if (overlay) overlay.style.display = 'none';
+    const app = document.getElementById('main-app-container');
+    if (app) app.style.display = 'block';
+    
+    // Atualizar nome do usuário no sidebar (se existir campo)
+    const userEl = document.querySelector('.user-info h4');
+    if (userEl) userEl.textContent = username;
+    
+    if (typeof renderDashboard === 'function') renderDashboard(); 
+}
+
+async function handleLogout() {
+    try {
+        const backend = (typeof appConfig !== 'undefined' && appConfig.backendUrl) || '';
+        const baseUrl = backend.endsWith('/') ? backend.slice(0, -1) : backend;
+        await fetch(`${baseUrl}/api/logout`, { method: 'POST' });
+        location.reload();
+    } catch (err) {
+        location.reload();
+    }
+}
+
+// Event Listeners for Login
+document.getElementById('login-form')?.addEventListener('submit', handleLogin);
+document.getElementById('logout-btn')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    handleLogout();
+});
+
+// ============================================
 // WINDOW RESIZE
 // ============================================
 let resizeTimer;
@@ -1525,7 +1620,9 @@ document.addEventListener('click', (e) => {
 // ============================================
 function init() {
     updateNotificationBadge();
-    renderDashboard();
+    
+    // Primeiro verifica autenticação
+    checkAuthStatus();
     
     // Inicia Sincronismo Automático se o Backend estiver acessível
     syncFromDatabase();
