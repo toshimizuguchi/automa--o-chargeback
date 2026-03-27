@@ -207,6 +207,12 @@ document.addEventListener('DOMContentLoaded', function() {
             window.fecharManualModal();
             return;
         }
+
+        // 4. Exportação Excel (Controle de Operações)
+        if (target.id === 'btn-export-excel' || target.closest('#btn-export-excel')) {
+            window.exportToExcel();
+            return;
+        }
     });
 
     var btnSalvar = document.getElementById('btn-salvar-manual');
@@ -326,34 +332,32 @@ function renderTimelineChart(daysCount = currentTimelineDays) {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     const rect = canvas.parentElement.getBoundingClientRect();
-    canvas.width = rect.width - 44;
-    canvas.height = 250;
+    
+    // Configuração de HiDPI para nitidez premium
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = (rect.width - 44) * dpr;
+    canvas.height = 250 * dpr;
+    canvas.style.width = `${rect.width - 44}px`;
+    canvas.style.height = `250px`;
+    ctx.scale(dpr, dpr);
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, rect.width, 250);
 
-    // Calcula dados reais baseado no período selecionado
     const days = [];
     const values = [];
     const now = new Date();
-    
-    // Para 90 dias, agrupamos por semana ou mostramos menos labels para não poluir
-    const step = daysCount > 30 ? 7 : (daysCount > 7 ? 3 : 1);
+    const step = daysCount > 30 ? 10 : (daysCount > 7 ? 4 : 1);
 
     for (let i = daysCount - 1; i >= 0; i--) {
         const d = new Date(now);
         d.setDate(d.getDate() - i);
-        
-        // Label formatada: ex "27 Mar"
         const dayLabel = d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
-        
-        // Só adiciona label ao array de labels visíveis conforme o step
         if (i % step === 0 || i === 0 || i === daysCount - 1) {
             days.push(dayLabel);
         } else {
             days.push("");
         }
         
-        // Conta casos recebidos neste dia
         const count = window.chargebacks.filter(c => {
             if (!c.dataRecebimento) return false;
             const dateC = new Date(c.dataRecebimento);
@@ -364,30 +368,30 @@ function renderTimelineChart(daysCount = currentTimelineDays) {
         values.push(count);
     }
 
-    const padding = { top: 20, right: 20, bottom: 40, left: 50 };
-    const chartWidth = canvas.width - padding.left - padding.right;
-    const chartHeight = canvas.height - padding.top - padding.bottom;
-    const maxVal = Math.max(...values) + 2;
+    const padding = { top: 30, right: 30, bottom: 40, left: 50 };
+    const chartWidth = (canvas.width / dpr) - padding.left - padding.right;
+    const chartHeight = (canvas.height / dpr) - padding.top - padding.bottom;
+    const maxVal = Math.max(...values, 5) + 2;
 
-    // Grid lines
-    ctx.strokeStyle = '#1f1f2e';
+    // Grid Glow
+    ctx.strokeStyle = 'rgba(99, 102, 241, 0.05)';
     ctx.lineWidth = 1;
     for (let i = 0; i <= 4; i++) {
         const y = padding.top + (chartHeight / 4) * i;
         ctx.beginPath();
         ctx.moveTo(padding.left, y);
-        ctx.lineTo(canvas.width - padding.right, y);
+        ctx.lineTo(padding.left + chartWidth, y);
         ctx.stroke();
 
         ctx.fillStyle = '#6b7280';
-        ctx.font = '11px Inter';
+        ctx.font = '500 11px Inter';
         ctx.textAlign = 'right';
-        ctx.fillText(Math.round(maxVal - (maxVal / 4) * i), padding.left - 10, y + 4);
+        ctx.fillText(Math.round(maxVal - (maxVal / 4) * i), padding.left - 12, y + 4);
     }
 
-    // Draw gradient area + line
-    const gradient = ctx.createLinearGradient(0, padding.top, 0, canvas.height - padding.bottom);
-    gradient.addColorStop(0, 'rgba(99, 102, 241, 0.25)');
+    // Modern Gradient
+    const gradient = ctx.createLinearGradient(0, padding.top, 0, padding.top + chartHeight);
+    gradient.addColorStop(0, 'rgba(99, 102, 241, 0.4)');
     gradient.addColorStop(1, 'rgba(99, 102, 241, 0)');
 
     const points = values.map((v, i) => ({
@@ -395,16 +399,11 @@ function renderTimelineChart(daysCount = currentTimelineDays) {
         y: padding.top + chartHeight - (v / maxVal) * chartHeight
     }));
 
-    // Area
-    ctx.beginPath();
-    ctx.moveTo(points[0].x, canvas.height - padding.bottom);
-    points.forEach(p => ctx.lineTo(p.x, p.y));
-    ctx.lineTo(points[points.length - 1].x, canvas.height - padding.bottom);
-    ctx.closePath();
-    ctx.fillStyle = gradient;
-    ctx.fill();
+    // Glow Effect
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = 'rgba(99, 102, 241, 0.4)';
 
-    // Line
+    // Main Line (Bezier)
     ctx.beginPath();
     ctx.moveTo(points[0].x, points[0].y);
     for (let i = 1; i < points.length; i++) {
@@ -412,32 +411,40 @@ function renderTimelineChart(daysCount = currentTimelineDays) {
         ctx.bezierCurveTo(cp1x, points[i - 1].y, cp1x, points[i].y, points[i].x, points[i].y);
     }
     ctx.strokeStyle = '#6366f1';
-    ctx.lineWidth = 2.5;
+    ctx.lineWidth = 3;
     ctx.stroke();
 
-    // Dots (Show fewer dots for longer periods)
-    points.forEach((p, i) => {
-        // Só desenha o ponto se houver uma label correspondente ou se for poucos dias
-        if (days[i] !== "" || daysCount <= 14) {
+    // Remove shadows for fill
+    ctx.shadowBlur = 0;
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, padding.top + chartHeight);
+    points.forEach(p => ctx.lineTo(p.x, p.y));
+    ctx.lineTo(points[points.length - 1].x, padding.top + chartHeight);
+    ctx.closePath();
+    ctx.fillStyle = gradient;
+    ctx.fill();
+
+    // Labels & Interactions
+    ctx.fillStyle = '#9ca3af';
+    ctx.textAlign = 'center';
+    days.forEach((day, i) => {
+        if (day) {
+            const x = padding.left + (chartWidth / (days.length - 1)) * i;
+            ctx.fillText(day, x, padding.top + chartHeight + 25);
+            
+            // Marker
             ctx.beginPath();
-            ctx.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
+            ctx.arc(points[i].x, points[i].y, 4, 0, Math.PI * 2);
             ctx.fillStyle = '#6366f1';
             ctx.fill();
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, 1.8, 0, Math.PI * 2);
-            ctx.fillStyle = '#fff';
-            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
         }
     });
 
-    // X Labels
-    ctx.fillStyle = '#6b7280';
-    ctx.font = '11px Inter';
-    ctx.textAlign = 'center';
-    days.forEach((day, i) => {
-        const x = padding.left + (chartWidth / (days.length - 1)) * i;
-        ctx.fillText(day, x, canvas.height - 10);
-    });
+    // Tooltip interativo simulado
+    canvas.title = "Dados reais sincronizados do banco de dados.";
 }
 
 function renderReasonsChart() {
@@ -1411,36 +1418,41 @@ function showToast(type, message) {
 }
 
 // ============================================
-// CSV EXPORT
+// EXPORT SYSTEM (EXCEL/CSV)
 // ============================================
-document.getElementById('btn-exportar')?.addEventListener('click', () => {
-    const headers = ['ID', 'Cliente', 'Email', 'CPF', 'Valor', 'Motivo', 'Bandeira', 'Status', 'Data Recebimento', 'Prazo'];
-    const rows = chargebacks.map(c => [
+window.exportToExcel = function() {
+    const headers = ['ID', 'Data Cadastro', 'Cliente', 'Email', 'Valor', 'Bandeira', 'Motivo', 'Status'];
+    const rows = window.chargebacks.map(c => [
         c.id,
+        c.dataRecebimento ? new Date(c.dataRecebimento).toLocaleDateString('pt-BR') : 'N/A',
         c.cliente.nome,
         c.cliente.email,
-        c.cliente.cpf,
-        c.transacao.valor.toFixed(2),
-        MOTIVOS_MAP[c.motivo],
-        BANDEIRAS_MAP[c.transacao.bandeira],
-        STATUS_LABELS[c.status],
-        formatDate(c.dataRecebimento),
-        formatDate(c.prazo)
+        c.transacao.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 }),
+        c.transacao.bandeira.toUpperCase(),
+        c.motivo,
+        STATUS_LABELS[c.status] || c.status
     ]);
 
-    let csv = headers.join(';') + '\n';
+    // Usando ponto e vírgula e BOM para total compatibilidade com Excel PT-BR
+    let csvContent = "\uFEFF"; 
+    csvContent += headers.join(";") + "\r\n";
+
     rows.forEach(row => {
-        csv += row.map(v => `"${v}"`).join(';') + '\n';
+        const escapedRow = row.map(val => `"${String(val).replace(/"/g, '""')}"`);
+        csvContent += escapedRow.join(";") + "\r\n";
     });
 
-    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `chargebacks_${new Date().toISOString().split('T')[0]}.csv`;
+    const dateStr = new Date().toISOString().split('T')[0];
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `chargeguard_relatorio_${dateStr}.csv`);
     link.click();
 
-    showToast('success', 'Relatório CSV exportado com sucesso!');
-});
+    showToast('success', 'Relatório Excel exportado com sucesso!');
+};
 
 // "Ver todos" button
 document.getElementById('btn-ver-todos')?.addEventListener('click', () => {
