@@ -506,10 +506,10 @@ document.getElementById('btn-enviar-pagarme').addEventListener('click', async ()
     pipeline.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
     const steps = [
-        { id: 1, delay: 1500 },
-        { id: 2, delay: 2000 },
-        { id: 3, delay: 1500 },
-        { id: 4, delay: 2500 }
+        { id: 1, delay: 800 },
+        { id: 2, delay: 1200 },
+        { id: 3, delay: 800 },
+        { id: 4, delay: 1500 }
     ];
 
     for (const step of steps) {
@@ -562,11 +562,9 @@ document.getElementById('btn-enviar-pagarme').addEventListener('click', async ()
         document.getElementById('sim-step-1').querySelector('.sim-step-status').textContent = '⏳';
 
         btn.disabled = false;
-        btn.innerHTML = '🚀 Enviar Defesa ao Pagar.me';
-        
         // Redireciona de volta para a central de operações
         if (window.navigateToPage) window.navigateToPage('casos');
-    }, 4000);
+    }, 2500);
 });
 
 // ============================================
