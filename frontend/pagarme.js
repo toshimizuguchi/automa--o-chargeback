@@ -501,70 +501,41 @@ document.getElementById('btn-enviar-pagarme').addEventListener('click', async ()
     const pipeline = document.getElementById('simulation-pipeline');
 
     btn.disabled = true;
-    btn.innerHTML = '⏳ Iniciando Automação...';
-    pipeline.style.display = 'block';
-    pipeline.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-    const steps = [
-        { id: 1, delay: 800 },
-        { id: 2, delay: 1200 },
-        { id: 3, delay: 800 },
-        { id: 4, delay: 1500 }
-    ];
-
-    for (const step of steps) {
-        // Ativar passo atual
-        const stepEl = document.getElementById(`sim-step-${step.id}`);
-        stepEl.classList.add('active');
-        stepEl.querySelector('.sim-step-status').textContent = '🔄';
-
-        await new Promise(resolve => setTimeout(resolve, step.delay));
-
-        // Finalizar passo atual
-        stepEl.classList.remove('active');
-        stepEl.classList.add('success');
-        stepEl.querySelector('.sim-step-status').textContent = '✅';
-    }
-
-    // Processamento concluído
+    btn.innerHTML = '🚀 Transmitindo...';
+    
+    // Processamento Rápido
     cb.status = 'em-disputa';
     cb.pagarmeDisputeId = 'sim_' + Math.random().toString(36).substr(2, 9).toUpperCase();
-    cb.historico.push({ data: new Date(), texto: `[MODO SANDBOX] Defesa enviada com sucesso. Mock ID: ${cb.pagarmeDisputeId}` });
-    cb.historico.push({ data: new Date(), texto: `Integração simulada: 4 anexos + carta compilada transmitidos.` });
+    cb.historico.push({ data: new Date(), texto: `Defesa enviada com sucesso (Pagar.me Sandbox).` });
 
     // Sincronizar com o Banco de Dados (Persistência)
     if (window.syncStatusWithDB) {
         window.syncStatusWithDB(cb.id, 'em-disputa');
     }
 
+    // Notificações
     notifications.unshift({
         id: Date.now(),
         type: 'success',
         icon: '🚀',
-        title: 'Defesa Transmitida (Simulação)',
-        text: `Caso ${cb.id} movido para disputa no gateway simulado.`,
+        title: 'Defesa Enviada ao Pagar.me',
+        text: `Caso ${cb.id} em disputa com sucesso.`,
         time: 'Agora',
         unread: true
     });
 
     if (window.updateNotificationBadge) window.updateNotificationBadge();
-    showToast('success', `Simulação concluída! Caso ${cb.id} em disputa.`);
+    showToast('success', `✅ Transmissão concluída! Caso ${cb.id} em disputa.`);
+    
+    btn.innerHTML = '✅ Enviado!';
 
-    btn.innerHTML = '✅ Defesa Enviada (Sandbox)';
-
+    // Voltar Imediatamente para Operações (800ms para ver o toast)
     setTimeout(() => {
-        pipeline.style.display = 'none';
-        // Resetar steps para próxima vez
-        document.querySelectorAll('.sim-step').forEach(s => {
-            s.classList.remove('active', 'success');
-            s.querySelector('.sim-step-status').textContent = '';
-        });
-        document.getElementById('sim-step-1').querySelector('.sim-step-status').textContent = '⏳';
-
         btn.disabled = false;
-        // Redireciona de volta para a central de operações
+        btn.innerHTML = '🚀 Enviar Defesa ao Pagar.me';
         if (window.navigateToPage) window.navigateToPage('casos');
-    }, 2500);
+        if (window.renderCasesTable) window.renderCasesTable();
+    }, 800);
 });
 
 // ============================================
