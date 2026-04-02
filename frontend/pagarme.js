@@ -241,6 +241,11 @@ function generateDefenseLetter(cb) {
     const items = checklistStates[cb.id] || PROOF_CHECKLISTS[cb.motivo] || [];
     const provasText = items.map((p, i) => `   ${i + 1}. ${p.label}`).join('\n');
 
+    // DETECÇÃO DE EMPRESA (Allevo vs Quero)
+    const isQuero = empresa.toUpperCase().includes('QUERO');
+    const nomeComercial = isQuero ? 'Quero Educação' : 'Melhor Escola';
+    const siteOficial = isQuero ? 'https://querobolsa.com.br/' : 'www.melhorescola.com.br';
+
     const carta = `CARTA DE DEFESA – REAPRESENTAÇÃO DE CHARGEBACK
 
 ${empresa}
@@ -253,61 +258,61 @@ No intuito de contribuir para a adequada análise do presente processo de reapre
 
 I. Da Atividade Desenvolvida pela Empresa e Natureza do Serviço Prestado
 
-O ${empresa} é um produto de tecnologia educacional integrante de um ecossistema educacional consolidado, lançado em 2010, com o objetivo de ampliar o acesso de estudantes brasileiros ao ensino básico pelo fornecimento de bolsas de estudos.
+O ${nomeComercial} é ${isQuero ? 'uma empresa de tecnologia educacional integrante de um ecossistema educacional consolidado, com o objetivo de ampliar o acesso de estudantes brasileiros ao ensino' : 'um produto de tecnologia educacional integrante de um ecossistema educacional consolidado, lançado em 2010, com o objetivo de ampliar o acesso de estudantes brasileiros ao ensino básico'} pelo fornecimento de bolsas de estudos.
 
-Por meio de sua plataforma digital, atua como marketplace educacional, conectando responsáveis por alunos a instituições de ensino, oferecendo bolsas de estudo com descontos sobre as mensalidades.
+Por meio de sua plataforma digital (${siteOficial}), atua como marketplace educacional, conectando responsáveis por alunos a instituições de ensino, oferecendo bolsas de estudo com descontos sobre as mensalidades.
 
 A operação do produto é pautada pelos princípios da boa-fé objetiva, transparência e segurança da informação, disponibilizando aos usuários todas as condições contratuais previamente à contratação.
 
 II. Da relação consumerista
 
-${getDefenseArgument(cb.motivo, cb)}
+${getDefenseArgument(cb.motivo, cb, isQuero)}
 
 Dessa forma, resta evidenciado que o consumidor teve ciência prévia, clara e inequívoca das regras contratuais, não havendo qualquer divergência entre o serviço ofertado e aquele efetivamente disponibilizado. Inexiste, portanto, a fundamentação alegada, mas apenas a tentativa posterior de questionamento de condição expressamente aceita no ato da contratação.
 
-III. Do Uso de Cartão de Terceiro e do Vínculo Familiar
+III. ${cb.motivo === 'fraude' ? 'Da Cobrança de Renovação e Ausência de Fraude' : 'Do Uso de Cartão de Terceiro e do Vínculo Familiar'}
 
-Cumpre esclarecer que os beneficiários finais das bolsas de estudo são, em sua maioria, menores de idade, não possuindo renda própria, sendo prática comum que o pagamento seja realizado por pais, responsáveis legais ou outros familiares.
-
-No caso concreto, as transações foram realizadas com cartão de crédito de terceiro, o qual possui vínculo familiar direto com a consumidora, conforme demonstrado no termo de adesão e documentos anexos. Observa-se, inclusive, a coincidência de sobrenomes entre o titular do cartão, o responsável e o aluno beneficiário, afastando qualquer indício de uso indevido ou fraude.
+${cb.motivo === 'fraude' 
+    ? `A cobrança questionada refere-se à renovação/aquisição da bolsa de estudos, condição necessária para a manutenção do desconto concedido, estando o benefício ativo, vigente e em efetivo uso. Assim, em ${formatDate(cb.transacao.data)}, foi processada a transação nº ${cb.transacao.id}, objeto do presente chargeback, em estrita observância aos termos previamente aceitos.`
+    : `Cumpre esclarecer que os beneficiários finais das bolsas de estudo são, em sua maioria, menores de idade, não possuindo renda própria, sendo prática comum que o pagamento seja realizado por pais, responsáveis legais ou outros familiares. No caso concreto, as transações foram realizadas com cartão de crédito de terceiro, o qual possui vínculo familiar direto com a consumidora. Observa-se, inclusive, a coincidência de sobrenomes, afastando qualquer indício de uso indevido.`}
 
 IV. Da Transparência das Informações e Possibilidade de Cancelamento
 
-A plataforma disponibiliza, de forma clara e acessível, todas as informações relativas às cobranças, histórico de pagamentos e regras contratuais, permitindo o acompanhamento integral pelo usuário a qualquer tempo. Ademais, o pedido de cancelamento é procedimento simples, amplamente divulgado, desde que observados os requisitos contratuais — o que não foi solicitado antes da cobrança questionada.
+A plataforma do ${nomeComercial} disponibiliza, de forma clara e acessível, todas as informações relativas às cobranças, histórico de pagamentos e regras contratuais, permitindo o acompanhamento integral pelo usuário a qualquer tempo. Ademais, o pedido de cancelamento é procedimento simples, amplamente divulgado, desde que observados os requisitos contratuais.
 
 V. Da Boa-fé da Empresa e da Improcedência do Chargeback
 
-No momento da contratação, os termos da bolsa foram apresentados de forma clara e objetiva, em conformidade com o art. 31 do Código de Defesa do Consumidor. Não há qualquer conduta ilícita, omissiva ou dolosa por parte da empresa. Ao contrário, a reserva da bolsa para o aluno beneficiário impediu que outro estudante usufruísse do mesmo desconto.
+No momento da contratação, os termos da bolsa e do plano foram apresentados de forma clara e objetiva, em conformidade com o art. 31 do Código de Defesa do Consumidor. Não há qualquer conduta ilícita, omissiva ou dolosa por parte da empresa. Ao contrário, a reserva da bolsa para o aluno beneficiário impediu que outro estudante usufruísse do mesmo desconto, reforçando o efetivo cumprimento da obrigação contratual.
+
+Diante disso, resta evidente que o motivo “${cb.motivo === 'fraude' ? 'fraude' : 'desacordo comercial'}” não encontra respaldo fático ou jurídico, devendo o chargeback ser julgado improcedente.
 
 VI. Conclusão
 
-Diante de todo o exposto, requer-se o reconhecimento da legitimidade da transação e o cancelamento definitivo do chargeback, com a consequente manutenção do valor repassado à empresa. 
+Diante de todo o exposto, requer-se o reconhecimento da legitimidade da transação e o cancelamento definitivo do chargeback. 
 
 Certos de que os esclarecimentos prestados são suficientes para uma decisão favorável, agradecemos a atenção.
 
 Atenciosamente,
-Departamento Financeiro - ${empresa}
+Departamento Financeiro - ${nomeComercial}
 Responsável: ${resp}
 Data: ${hoje}`;
 
     body.textContent = carta;
 }
 
-function getDefenseArgument(motivo, cb) {
+function getDefenseArgument(motivo, cb, isQuero = false) {
     const dataTx = cb.transacao.data ? new Date(cb.transacao.data).toLocaleDateString('pt-BR') : 'N/A';
+    const nomeComercial = isQuero ? 'Quero Bolsa' : 'Melhor Escola';
     
     const args = {
-        'fraude': `O mecanismo de chargeback possui como finalidade a proteção do consumidor em hipóteses de fraude efetiva ou uso indevido do meio de pagamento, o que não se verifica no presente caso. 
-        Em ${dataTx}, o(a) consumidor(a) ${cb.cliente.nome}, CPF nº ${cb.cliente.cpf}, realizou a contratação junto ao Melhor Escola, conforme transação nº ${cb.transacao.id}, referente à aquisição de bolsa de estudos. A cobrança questionada refere-se à renovação/aquisição da bolsa, condição necessária para a manutenção do desconto concedido, estando o benefício ativo e em uso.`,
+        'fraude': `O mecanismo de chargeback possui como finalidade a proteção do consumidor em hipóteses de fraude efetiva ou uso indevido do meio de pagamento, o que não se verifica no presente caso. Em ${dataTx}, o(a) consumidor(a) ${cb.cliente.nome}, CPF nº ${cb.cliente.cpf}, realizou a contratação junto ao ${nomeComercial}, conforme transação nº ${cb.transacao.id}, referente à aquisição de bolsa de estudos de natureza digital.`,
         
-        'desacordo-comercial': `O motivo de desacordo comercial pressupõe a existência de divergência relevante entre o produto ofertado e aquele efetivamente entregue, o que não se verifica. 
-        Em ${dataTx}, o(a) consumidor(a) ${cb.cliente.nome}, CPF nº ${cb.cliente.cpf}, realizou, de forma livre e consciente, a contratação junto à plataforma, conforme transação nº ${cb.transacao.id}, após ter tido pleno acesso às informações essenciais do produto, incluindo regras de utilização e cancelamento.`,
+        'desacordo-comercial': `O motivo de desacordo comercial pressupõe a existência de divergência relevante entre o produto ofertado e aquele efetivamente entregue, ou ainda o descumprimento das condições previamente informadas ao consumidor, o que não se verifica no presente caso. Em ${dataTx}, o(a) consumidor(a) ${cb.cliente.nome}, CPF nº ${cb.cliente.cpf}, realizou, de forma livre, consciente e voluntária, a contratação em nossa plataforma, conforme transação nº ${cb.transacao.id}.`,
         
-        'produto-nao-recebido': `O motivo alegado é "Produto não recebido". Contudo, informamos que o acesso ao serviço digital foi integralmente disponibilizado ao cliente ${cb.cliente.nome} logo após a confirmação do pagamento da transação ${cb.transacao.id} em ${dataTx}. O produto de natureza educacional digital encontra-se ativo e vinculado ao CPF ${cb.cliente.cpf}.`,
+        'produto-nao-recebido': `O motivo alegado é "Produto não recebido". Contudo, informamos que o acesso ao serviço de natureza digital foi integralmente disponibilizado ao cliente ${cb.cliente.nome} logo após a confirmação do pagamento em ${dataTx}. O produto encontra-se ativo e vinculado ao CPF ${cb.cliente.cpf}.`,
     };
     
-    // Tratamento para motivos que não mapeiam exatamente mas usam a lógica de desacordo como base juridica
-    const defaultArg = `Inexiste o desacordo alegado. Em ${dataTx}, o consumidor ${cb.cliente.nome} (CPF: ${cb.cliente.cpf}) aderiu voluntariamente aos termos do serviço, conforme transação ${cb.transacao.id}. Todas as condições comerciais foram apresentadas e aceitas via aceite eletrônico.`;
+    const defaultArg = `Inexiste o desacordo alegado. Em ${dataTx}, o consumidor ${cb.cliente.nome} (CPF: ${cb.cliente.cpf}) aderiu voluntariamente aos termos do serviço em nossa plataforma, conforme transação ${cb.transacao.id}. Todas as condições comerciais foram aceitas via aceite eletrônico.`;
     
     return args[motivo] || args['desacordo-comercial'] || defaultArg;
 }
