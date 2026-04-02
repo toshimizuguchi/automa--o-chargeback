@@ -189,23 +189,23 @@ def get_chargebacks(request):
             formatted_data.append({
                 "id": f"CB-{cb.id_chargeback}",
                 "cliente": { 
-                    "nome": cb.nome_aluno or cb.empresa_pagadora or "Desconhecido", 
-                    "email": cb.email_aluno or "contato@empresa.com",
-                    "cpf": cb.documento_aluno or "000.000.000-00",
-                    "telefone": cb.telefone_aluno or "(11) 99999-9999"
+                    "nome": cb.nome_aluno or cb.empresa_pagadora or "Cliente Desconhecido", 
+                    "email": "contato@empresa.com", # Campo não existe no seu models.py atualmente
+                    "cpf": cb.cpf_aluno or "000.000.000-00", # Corrigido de documento_aluno para cpf_aluno
+                    "telefone": "(00) 00000-0000" # Campo não existe no seu models.py
                 },
                 "transacao": { 
                     "id": cb.id_transacao_pagarme or "N/A", 
                     "valor": float(cb.valor or 0), 
                     "data": cb.data_cadastro.isoformat() if cb.data_cadastro else None,
-                    "bandeira": cb.bandeira_cartao.lower() if cb.bandeira_cartao else "visa" 
+                    "bandeira": "visa" # Campo não existe no seu models.py, fixamos em visa
                 },
                 "motivo": str(motivo_str).lower().replace(' ', '-'),
                 "status": cb.status_processo.lower() if cb.status_processo else "recebido",
                 "dataRecebimento": cb.data_cadastro.isoformat() if cb.data_cadastro else None,
                 "prazo": prazo_data,
                 "historico": [
-                    {"data": cb.data_cadastro.isoformat() if cb.data_cadastro else "", "texto": "Caso registrado no sistema via importação/sincronização."}
+                    {"data": cb.data_cadastro.isoformat() if cb.data_cadastro else "", "texto": "Caso registrado no sistema."}
                 ]
             })
         return formatted_data
