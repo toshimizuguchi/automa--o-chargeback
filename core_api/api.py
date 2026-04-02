@@ -120,24 +120,42 @@ def get_chargebacks(request):
         elif cb.motivo_informado:
             motivo_str = cb.motivo_informado
             
+        # Função interna para calcular 10 dias úteis (Seg-Sex)
+        def add_business_days(start_date, add_days):
+            current_date = start_date
+            while add_days > 0:
+                current_date += timedelta(days=1)
+                if current_date.weekday() < 5: # 0-4 são Seg-Sex
+                    add_days -= 1
+            return current_date
+
+        # Calcula prazo (10 dias úteis após data_cadastro/recebimento)
+        prazo_data = None
+        if cb.data_cadastro:
+            from datetime import timedelta
+            prazo_dt = add_business_days(cb.data_cadastro, 10)
+            prazo_data = prazo_dt.isoformat()
+
         formatted_data.append({
             "id": f"CB-{cb.id_chargeback}",
             "cliente": { 
                 "nome": cb.nome_aluno or cb.empresa_pagadora or "Desconhecido", 
-                "email": "contato@empresa.com" 
+                "email": cb.email_aluno or "contato@empresa.com",
+                "cpf": cb.documento_aluno or "000.000.000-00",
+                "telefone": cb.telefone_aluno or "(11) 99999-9999"
             },
             "transacao": { 
                 "id": cb.id_transacao_pagarme or "N/A", 
                 "valor": float(cb.valor or 0), 
                 "data": cb.data_cadastro.isoformat() if cb.data_cadastro else None,
-                "bandeira": "visa" 
+                "bandeira": cb.bandeira_cartao.lower() if cb.bandeira_cartao else "visa" 
             },
-            "motivo": str(motivo_str),
+            "motivo": str(motivo_str).lower().replace(' ', '-'), # Normaliza para o frontend
             "status": cb.status_processo.lower() if cb.status_processo else "recebido",
             "dataRecebimento": cb.data_cadastro.isoformat() if cb.data_cadastro else None,
-            "prazo": None,
+            "prazo": prazo_data,
             "historico": [
-                {"data": cb.data_cadastro.isoformat() if cb.data_cadastro else "", "texto": "Caso registrado no banco de dados."}
+                {"data": cb.data_cadastro.isoformat() if cb.data_cadastro else "", "texto": "Caso registrado no sistema via importação/sincronização."}
             ]
         })
     

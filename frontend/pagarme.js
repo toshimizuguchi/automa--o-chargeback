@@ -71,6 +71,7 @@ const PROOF_CHECKLISTS = {
 let checklistStates = {};
 let defesaFiles = [];
 let selectedDefesaCaseId = null;
+let _isCompilingLock = false; // Lock global para evitar múltiplas gerações de PDF
 
 // ============================================
 // PAGE TITLES (extend existing)
@@ -352,8 +353,8 @@ document.getElementById('btn-compilar-pdf').addEventListener('click', async (e) 
         return;
     }
 
-    if (this._isCompiling) return;
-    this._isCompiling = true;
+    if (_isCompilingLock) return;
+    _isCompilingLock = true;
 
     const cb = chargebacks.find(c => c.id === selectedDefesaCaseId);
     if (!cb) return;
@@ -379,7 +380,7 @@ document.getElementById('btn-compilar-pdf').addEventListener('click', async (e) 
     } finally {
         btn.disabled = false;
         btn.innerHTML = originalText;
-        this._isCompiling = false;
+        _isCompilingLock = false;
     }
 });
 
@@ -406,7 +407,7 @@ async function generateFullPDF(cb, jspdfLib, pdflib, filesToProcess) {
         doc.setFontSize(16);
         doc.setTextColor(99, 102, 241);
         doc.setFont("helvetica", "bold");
-        doc.text("ChargeGuard — Defense Dossier", 35, 20);
+        doc.text("ChargeGuard — Dossiê de Defesa", 35, 20);
     }
 
     const cartaText = document.getElementById('carta-body').textContent;
@@ -521,26 +522,61 @@ document.getElementById('btn-enviar-pagarme').addEventListener('click', async ()
     btn.disabled = true;
     btn.innerHTML = '🚀 Transmitindo...';
     
-    // Processamento Rápido
+    // Início da Simulação Visual
+    if (pipeline) {
+        pipeline.style.display = 'block';
+        const steps = pipeline.querySelectorAll('.sim-step');
+        
+        // Reset steps
+        steps.forEach(s => {
+            s.classList.remove('active', 'completed');
+            s.querySelector('.sim-step-status').textContent = '';
+        });
+
+        const runStep = (idx) => {
+            return new Promise(resolve => {
+                const s = steps[idx];
+                s.classList.add('active');
+                s.querySelector('.sim-step-status').textContent = '⏳';
+                s.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+                setTimeout(() => {
+                    s.classList.remove('active');
+                    s.classList.add('completed');
+                    s.querySelector('.sim-step-status').textContent = '✅';
+                    resolve();
+                }, 600 + Math.random() * 800);
+            });
+        };
+
+        await runStep(0);
+        await runStep(1);
+        await runStep(2);
+        await runStep(3);
+    }
+
+    // Processamento Rápido (Estado final)
     cb.status = 'em-disputa';
     cb.pagarmeDisputeId = 'sim_' + Math.random().toString(36).substr(2, 9).toUpperCase();
     cb.historico.push({ data: new Date(), texto: `Defesa enviada com sucesso (Pagar.me Sandbox).` });
 
     // Sincronizar com o Banco de Dados (Persistência)
     if (window.syncStatusWithDB) {
-        window.syncStatusWithDB(cb.id, 'em-disputa');
+        await window.syncStatusWithDB(cb.id, 'em-disputa');
     }
 
     // Notificações
-    notifications.unshift({
-        id: Date.now(),
-        type: 'success',
-        icon: '🚀',
-        title: 'Defesa Enviada ao Pagar.me',
-        text: `Caso ${cb.id} em disputa com sucesso.`,
-        time: 'Agora',
-        unread: true
-    });
+    if (window.notifications) {
+        window.notifications.unshift({
+            id: Date.now(),
+            type: 'success',
+            icon: '🚀',
+            title: 'Defesa Enviada ao Pagar.me',
+            text: `Caso ${cb.id} em disputa com sucesso no Sandbox.`,
+            time: 'Agora',
+            unread: true
+        });
+    }
 
     if (window.updateNotificationBadge) window.updateNotificationBadge();
     showToast('success', `✅ Transmissão concluída! Caso ${cb.id} em disputa.`);
@@ -582,9 +618,11 @@ function resetDefesaForm() {
     const select = document.getElementById('defesa-caso-select');
     if (select) select.value = '';
     
-    // 5. Limpar preview da carta
+    // 5. Limpar preview da carta e simulação
     const body = document.getElementById('carta-body');
     if (body) body.textContent = 'Aguardando seleção de caso...';
+    const pipeline = document.getElementById('simulation-pipeline');
+    if (pipeline) pipeline.style.display = 'none';
 
     // 6. Esconder painéis de configuração (Reset visual total)
     const checklistCard = document.getElementById('checklist-card');
@@ -614,8 +652,17 @@ defInput.addEventListener('change', (e) => {
 });
 function renderDefesaFiles() {
     const c = document.getElementById('defesa-uploaded-files'); if (!c) return;
-    c.innerHTML = defesaFiles.map((f, i) => `<div class="uploaded-file"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>${f.name}</span><button class="remove-file" onclick="defesaFiles.splice(${i},1);renderDefesaFiles();"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>`).join('');
+    const header = defesaFiles.length > 0 ? `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><span style="font-size:0.75rem; color:var(--text-muted)">${defesaFiles.length} arquivo(s)</span><button onclick="clearDefesaFiles()" class="btn-link" style="color:var(--red-400); font-size:0.75rem;">Limpar Tudo</button></div>` : '';
+    c.innerHTML = header + defesaFiles.map((f, i) => `<div class="uploaded-file"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>${f.name}</span><button class="remove-file" onclick="defesaFiles.splice(${i},1);renderDefesaFiles();"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>`).join('');
 }
+
+window.clearDefesaFiles = function() {
+    if (confirm('Deseja remover todos os anexos?')) {
+        defesaFiles = [];
+        renderDefesaFiles();
+        if (selectedDefesaCaseId) updateSendButton(selectedDefesaCaseId);
+    }
+};
 
 // ============================================
 // CONFIG PAGE & PROFILES

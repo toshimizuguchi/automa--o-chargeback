@@ -2630,3 +2630,47 @@ body {
         margin-right: 0; 
     }
 }
+/* Simulation Steps Styles */
+.sim-step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.02);
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+    opacity: 0.6;
+}
+
+.sim-step.active {
+    opacity: 1;
+    background: rgba(99, 102, 241, 0.1);
+    border-left: 3px solid var(--indigo-500);
+    box-shadow: var(--shadow-sm);
+}
+
+.sim-step.completed {
+    opacity: 1;
+    background: rgba(16, 185, 129, 0.05);
+}
+
+.sim-step-icon {
+    font-size: 1.2rem;
+}
+
+.sim-step-content h5 {
+    font-size: 0.85rem;
+    margin-bottom: 2px;
+    color: var(--text-primary);
+}
+
+.sim-step-content p {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.sim-step-status {
+    margin-left: auto;
+    font-weight: bold;
+}

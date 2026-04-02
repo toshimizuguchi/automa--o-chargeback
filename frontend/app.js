@@ -133,6 +133,16 @@ window.salvarNovaEntrada = function() {
         return;
     }
 
+    function addBusinessDays(days) {
+        let date = new Date();
+        let count = 0;
+        while (count < days) {
+            date.setDate(date.getDate() + 1);
+            if (date.getDay() !== 0 && date.getDay() !== 6) count++;
+        }
+        return date;
+    }
+
     var novoCb = {
         id: 'CB-' + Date.now().toString().slice(-7),
         cliente: {
@@ -149,7 +159,7 @@ window.salvarNovaEntrada = function() {
         },
         motivo: document.getElementById('manual-motivo').value,
         dataRecebimento: new Date(),
-        prazo: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        prazo: addBusinessDays(10),
         status: 'recebido',
         historico: [{ data: new Date(), texto: 'Entrada manual registrada.' }]
     };
