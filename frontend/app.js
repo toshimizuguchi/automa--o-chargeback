@@ -94,7 +94,12 @@ async function syncFromDatabase() {
             var syncResult = await syncResponse.json();
             console.log("Sync Pagar.me concluído:", syncResult.new_cases, "novos casos.");
         } else {
-            console.warn("Falha no Sync real Pagar.me, buscando apenas dados locais...");
+            var errorData = await syncResponse.json().catch(() => ({}));
+            console.error("Falha no Sync real Pagar.me:", errorData);
+            // Se a chave API estiver errada, avisamos mas tentamos continuar buscando dados locais
+            if (syncResponse.status === 401 || syncResponse.status === 403) {
+                if (typeof showToast === 'function') showToast('warning', 'Chave Pagar.me inválida. Buscando apenas dados locais.');
+            }
         }
 
         // PASSO 2: Buscar lista atualizada do banco local
@@ -105,7 +110,11 @@ async function syncFromDatabase() {
                 'Content-Type': 'application/json'
             }
         });
-        if (!response.ok) throw new Error("Erro de conexão (HTTP " + response.status + "): Verifique o Token de Segurança.");
+        
+        if (!response.ok) {
+            const errorMsg = await response.text();
+            throw new Error(`Erro no Banco (HTTP ${response.status}): ${errorMsg}`);
+        }
         
         var dadosReais = await response.json();
         console.log("Dados carregados com sucesso!");
@@ -114,7 +123,7 @@ async function syncFromDatabase() {
         window.chargebacks = dadosReais;
         
         if (typeof showToast === 'function') {
-            showToast('success', dadosReais.length + ' casos sincronizados do banco!');
+            showToast('success', dadosReais.length + ' casos sincronizados!');
         }
         
         if (typeof renderDashboard === 'function') renderDashboard();
@@ -123,13 +132,13 @@ async function syncFromDatabase() {
     } catch (error) {
         console.error("Erro fatal no sync:", error);
         if (typeof showToast === 'function') {
-            showToast('error', 'Erro ao conectar com o banco de dados.');
-        } else {
-            alert('Erro de conexão: Verifique seu servidor local.');
+            showToast('error', 'Falha na conexão: ' + error.message);
         }
     } finally {
-        btn.innerHTML = originalText;
-        btn.classList.remove('loading');
+        if (btn) {
+            btn.innerHTML = originalText;
+            btn.classList.remove('loading');
+        }
     }
 }
 
