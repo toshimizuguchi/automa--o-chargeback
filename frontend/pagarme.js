@@ -241,103 +241,75 @@ function generateDefenseLetter(cb) {
     const items = checklistStates[cb.id] || PROOF_CHECKLISTS[cb.motivo] || [];
     const provasText = items.map((p, i) => `   ${i + 1}. ${p.label}`).join('\n');
 
-    const carta = `══════════════════════════════════════════════
-   CARTA DE DEFESA — CONTESTAÇÃO DE CHARGEBACK
-══════════════════════════════════════════════
+    const carta = `CARTA DE DEFESA – REAPRESENTAÇÃO DE CHARGEBACK
 
-Data: ${hoje}
-Protocolo: DEF-${cb.id}
-Ref. Transação Pagar.me: ${cb.transacao.id}
-
-DE: ${empresa}
+${empresa}
 CNPJ: ${cnpj}
 Endereço: ${endereco}
-Responsável: ${resp}
-E-mail: ${emailEmp}
 
-PARA: Departamento de Disputas
-Bandeira: ${BANDEIRAS_MAP[cb.transacao.bandeira] || cb.transacao.bandeira}
-Via: Pagar.me — API de Contestação
+Prezados,
 
-══════════════════════════════════════════════
-   DADOS DA TRANSAÇÃO EM DISPUTA
-══════════════════════════════════════════════
+No intuito de contribuir para a adequada análise do presente processo de reapresentação de chargeback sob o código ${cb.id} referente a transação via cartão de crédito no importe de R$ ${cb.transacao.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}, apresentamos abaixo os esclarecimentos necessários.
 
-ID Transação:     ${cb.transacao.id}
-ID Chargeback:    ${cb.id}
-Valor:            R$ ${cb.transacao.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-Data Transação:   ${formatDate(cb.transacao.data)}
-Data Chargeback:  ${formatDate(cb.dataRecebimento)}
-Motivo Alegado:   ${motivo}
-Reason Code:      ${cb.codigoMotivo || 'N/A'}
-Bandeira:         ${BANDEIRAS_MAP[cb.transacao.bandeira] || ''}
+I. Da Atividade Desenvolvida pela Empresa e Natureza do Serviço Prestado
 
-══════════════════════════════════════════════
-   DADOS DO PORTADOR / CLIENTE
-══════════════════════════════════════════════
+O ${empresa} é um produto de tecnologia educacional integrante de um ecossistema educacional consolidado, lançado em 2010, com o objetivo de ampliar o acesso de estudantes brasileiros ao ensino básico pelo fornecimento de bolsas de estudos.
 
-Nome:     ${cb.cliente.nome}
-CPF:      ${cb.cliente.cpf}
-E-mail:   ${cb.cliente.email}
-Telefone: ${cb.cliente.telefone}
+Por meio de sua plataforma digital, atua como marketplace educacional, conectando responsáveis por alunos a instituições de ensino, oferecendo bolsas de estudo com descontos sobre as mensalidades.
 
-══════════════════════════════════════════════
-   ARGUMENTAÇÃO DE DEFESA
-══════════════════════════════════════════════
+A operação do produto é pautada pelos princípios da boa-fé objetiva, transparência e segurança da informação, disponibilizando aos usuários todas as condições contratuais previamente à contratação.
 
-Prezados Senhores,
-
-Vimos por meio desta contestar formalmente o chargeback de ID ${cb.id}, referente à transação ${cb.transacao.id}, no valor de R$ ${cb.transacao.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}, realizada em ${formatDate(cb.transacao.data)}.
+II. Da relação consumerista
 
 ${getDefenseArgument(cb.motivo, cb)}
 
-Ressaltamos que a ${empresa} opera em total conformidade com as regras das bandeiras e adquirentes, e que todas as transações passam por nosso sistema de análise de risco antes de serem aprovadas.
+Dessa forma, resta evidenciado que o consumidor teve ciência prévia, clara e inequívoca das regras contratuais, não havendo qualquer divergência entre o serviço ofertado e aquele efetivamente disponibilizado. Inexiste, portanto, a fundamentação alegada, mas apenas a tentativa posterior de questionamento de condição expressamente aceita no ato da contratação.
 
-══════════════════════════════════════════════
-   EVIDÊNCIAS ANEXADAS
-══════════════════════════════════════════════
+III. Do Uso de Cartão de Terceiro e do Vínculo Familiar
 
-Seguem as provas documentais que comprovam a legitimidade da transação:
+Cumpre esclarecer que os beneficiários finais das bolsas de estudo são, em sua maioria, menores de idade, não possuindo renda própria, sendo prática comum que o pagamento seja realizado por pais, responsáveis legais ou outros familiares.
 
-${provasText}
+No caso concreto, as transações foram realizadas com cartão de crédito de terceiro, o qual possui vínculo familiar direto com a consumidora, conforme demonstrado no termo de adesão e documentos anexos. Observa-se, inclusive, a coincidência de sobrenomes entre o titular do cartão, o responsável e o aluno beneficiário, afastando qualquer indício de uso indevido ou fraude.
 
-══════════════════════════════════════════════
-   CONCLUSÃO
-══════════════════════════════════════════════
+IV. Da Transparência das Informações e Possibilidade de Cancelamento
 
-Diante das evidências apresentadas, solicitamos respeitosamente que este chargeback seja revertido em favor de ${empresa}, restituindo o valor de R$ ${cb.transacao.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} à nossa conta.
+A plataforma disponibiliza, de forma clara e acessível, todas as informações relativas às cobranças, histórico de pagamentos e regras contratuais, permitindo o acompanhamento integral pelo usuário a qualquer tempo. Ademais, o pedido de cancelamento é procedimento simples, amplamente divulgado, desde que observados os requisitos contratuais — o que não foi solicitado antes da cobrança questionada.
 
-Colocamo-nos à disposição para qualquer esclarecimento adicional.
+V. Da Boa-fé da Empresa e da Improcedência do Chargeback
 
-${cfg.textoExtra ? '\n' + cfg.textoExtra + '\n' : ''}
+No momento da contratação, os termos da bolsa foram apresentados de forma clara e objetiva, em conformidade com o art. 31 do Código de Defesa do Consumidor. Não há qualquer conduta ilícita, omissiva ou dolosa por parte da empresa. Ao contrário, a reserva da bolsa para o aluno beneficiário impediu que outro estudante usufruísse do mesmo desconto.
+
+VI. Conclusão
+
+Diante de todo o exposto, requer-se o reconhecimento da legitimidade da transação e o cancelamento definitivo do chargeback, com a consequente manutenção do valor repassado à empresa. 
+
+Certos de que os esclarecimentos prestados são suficientes para uma decisão favorável, agradecemos a atenção.
+
 Atenciosamente,
-
-${resp}
-${empresa}
-CNPJ: ${cnpj}
-${emailEmp}
-${endereco}
-
-══════════════════════════════════════════════
-   Documento gerado automaticamente pelo
-   ChargeGuard — Sistema de Automação de Chargebacks
-   ${hoje}
-══════════════════════════════════════════════`;
+Departamento Financeiro - ${empresa}
+Responsável: ${resp}
+Data: ${hoje}`;
 
     body.textContent = carta;
 }
 
 function getDefenseArgument(motivo, cb) {
+    const dataTx = cb.transacao.data ? new Date(cb.transacao.data).toLocaleDateString('pt-BR') : 'N/A';
+    
     const args = {
-        'fraude': `O motivo alegado é "Fraude / Transação não reconhecida". Contudo, informamos que a transação foi devidamente autorizada e autenticada. Conforme evidências anexas, o produto/serviço foi entregue no endereço cadastrado pelo próprio portador do cartão, com confirmação de recebimento. Os logs de acesso demonstram que a compra foi realizada a partir de dispositivo previamente utilizado pelo cliente, com IP e geolocalização consistentes com o cadastro.`,
-        'produto-nao-recebido': `O motivo alegado é "Produto não recebido". Informamos que o produto foi devidamente enviado e entregue, conforme comprovante de entrega anexo com código de rastreamento ${cb.transacao.id}. O status da transportadora confirma a entrega bem-sucedida no endereço informado pelo cliente no momento da compra.`,
-        'produto-diferente': `O motivo alegado é "Produto diferente do descrito". Informamos que o produto enviado corresponde exatamente à descrição publicada em nosso site/plataforma. Anexamos fotos do produto, print da página do produto e a nota fiscal detalhada para comprovação.`,
-        'cobranca-duplicada': `O motivo alegado é "Cobrança duplicada". Esclarecemos que cada transação refere-se a pedidos distintos, com IDs de transação diferentes no Pagar.me, conforme documentação anexa. Cada pedido possui sua própria nota fiscal e comprovante de entrega.`,
-        'cancelamento': `O motivo alegado é "Cancelamento não processado". Informamos que o serviço foi integralmente prestado antes da solicitação de cancelamento, conforme logs de acesso anexos. Nossa política de cancelamento, aceita pelo cliente no momento da contratação, estabelece as condições aplicáveis.`,
-        'valor-incorreto': `O motivo alegado é "Valor incorreto". Informamos que o valor cobrado corresponde exatamente ao valor apresentado no checkout e aceito pelo cliente, conforme print da tela de pagamento e nota fiscal anexos.`,
-        'servico-nao-prestado': `O motivo alegado é "Serviço não prestado". Informamos que o serviço foi integralmente prestado, conforme logs de acesso e utilização pelo cliente anexos. O contrato/termos de uso foram aceitos pelo cliente previamente.`,
+        'fraude': `O mecanismo de chargeback possui como finalidade a proteção do consumidor em hipóteses de fraude efetiva ou uso indevido do meio de pagamento, o que não se verifica no presente caso. 
+        Em ${dataTx}, o(a) consumidor(a) ${cb.cliente.nome}, CPF nº ${cb.cliente.cpf}, realizou a contratação junto ao Melhor Escola, conforme transação nº ${cb.transacao.id}, referente à aquisição de bolsa de estudos. A cobrança questionada refere-se à renovação/aquisição da bolsa, condição necessária para a manutenção do desconto concedido, estando o benefício ativo e em uso.`,
+        
+        'desacordo-comercial': `O motivo de desacordo comercial pressupõe a existência de divergência relevante entre o produto ofertado e aquele efetivamente entregue, o que não se verifica. 
+        Em ${dataTx}, o(a) consumidor(a) ${cb.cliente.nome}, CPF nº ${cb.cliente.cpf}, realizou, de forma livre e consciente, a contratação junto à plataforma, conforme transação nº ${cb.transacao.id}, após ter tido pleno acesso às informações essenciais do produto, incluindo regras de utilização e cancelamento.`,
+        
+        'produto-nao-recebido': `O motivo alegado é "Produto não recebido". Contudo, informamos que o acesso ao serviço digital foi integralmente disponibilizado ao cliente ${cb.cliente.nome} logo após a confirmação do pagamento da transação ${cb.transacao.id} em ${dataTx}. O produto de natureza educacional digital encontra-se ativo e vinculado ao CPF ${cb.cliente.cpf}.`,
     };
-    return args[motivo] || `Contestamos este chargeback com base nas evidências documentais anexas que comprovam a legitimidade e a entrega do produto/serviço ao cliente.`;
+    
+    // Tratamento para motivos que não mapeiam exatamente mas usam a lógica de desacordo como base juridica
+    const defaultArg = `Inexiste o desacordo alegado. Em ${dataTx}, o consumidor ${cb.cliente.nome} (CPF: ${cb.cliente.cpf}) aderiu voluntariamente aos termos do serviço, conforme transação ${cb.transacao.id}. Todas as condições comerciais foram apresentadas e aceitas via aceite eletrônico.`;
+    
+    return args[motivo] || args['desacordo-comercial'] || defaultArg;
 }
 
 // ============================================
