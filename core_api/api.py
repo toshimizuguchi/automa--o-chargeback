@@ -11,9 +11,57 @@ api = NinjaAPI(title="ChargeGuard API Ninja")
 def ping(request):
     """
     Endpoint simples para testar se a API está online sem precisar de senha.
-    Acesse: https://[seu-dominio]/api/ping
     """
     return {"status": "OK", "message": "ChargeGuard API está online e pronta!"}
+
+class SyncSchema(Schema):
+    api_key: str
+    ambiente: str = "test"
+
+@api.post("/sync")
+def sync_pagarme(request, data: SyncSchema):
+    """
+    Busca chargebacks reais direto da API do Pagar.me v5.
+    """
+    api_key = data.api_key
+    url = "https://api.pagar.me/core/v5/chargebacks"
+    
+    try:
+        # Chamada real para o Pagar.me usando Basic Auth (sk_...)
+        response = requests.get(url, auth=(api_key, ""), timeout=15)
+        
+        if not response.ok:
+            return JsonResponse({"status": "error", "message": f"Erro Pagar.me: {response.text}"}, status=response.status_code)
+        
+        pagarme_data = response.json()
+        chargebacks_list = pagarme_data.get('data', [])
+        
+        new_count = 0
+        for item in chargebacks_list:
+            # Verifica se já temos esse chargeback (usando transaction_id como chave de busca simplificada)
+            # Idealmente usaríamos o ID do chargeback da Pagar.me se tivéssemos essa coluna no banco.
+            txn_id = item.get('transaction_id')
+            
+            if not Chargeback.objects.filter(id_transacao_pagarme=txn_id).exists():
+                # Tenta extrair dados do cliente de metadados ou da transação (se a API v5 retornar)
+                # Nota: Na lista simples as vezes vem apenas o básico, adaptamos.
+                
+                # Criar novo registro
+                Chargeback.objects.create(
+                    id_transacao_pagarme=txn_id,
+                    valor=float(item.get('amount', 0)) / 100,
+                    motivo_informado=item.get('reason_message', 'Motivo não informado'),
+                    status_processo="recebido",
+                    empresa_pagadora="Pagar.me API",
+                    nome_aluno="Cliente Pagar.me", # Fallback pois a lista v5 as vezes exige outro fetch p/ cliente
+                    origem_arquivo="Sincronização API Pagar.me"
+                )
+                new_count += 1
+        
+        return {"status": "success", "new_cases": new_count, "total_processed": len(chargebacks_list)}
+
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
 class LoginSchema(Schema):
     username: str

@@ -59,6 +59,9 @@ async function syncFromDatabase() {
     var btn = document.getElementById('btn-sync-now');
     if (!btn) return;
 
+    // Inicia Skeleton Loader na tabela antes do fetch
+    renderTableSkeleton();
+
     var originalText = btn.innerHTML;
     try {
         btn.innerHTML = '🔄 Sincronizando...';
@@ -73,6 +76,28 @@ async function syncFromDatabase() {
         var config = JSON.parse(localStorage.getItem('chargeguard_config') || '{}');
         var token = config.cgToken || '';
 
+        // PASSO 1: Sincronização REAL com Pagar.me via Backend
+        console.log("Passo 1: Chamando API de Sincronização Pagar.me...");
+        var syncResponse = await fetch(API_ROOT + '/api/sync', {
+            method: 'POST',
+            headers: {
+                'X-API-Key': token,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                api_key: config.apiKey || '',
+                ambiente: config.ambiente || 'test'
+            })
+        });
+
+        if (syncResponse.ok) {
+            var syncResult = await syncResponse.json();
+            console.log("Sync Pagar.me concluído:", syncResult.new_cases, "novos casos.");
+        } else {
+            console.warn("Falha no Sync real Pagar.me, buscando apenas dados locais...");
+        }
+
+        // PASSO 2: Buscar lista atualizada do banco local
         var response = await fetch(url, {
             method: 'GET',
             headers: {
@@ -589,8 +614,8 @@ function renderCasesTable(filter = currentFilter) {
         );
     }
 
-    tbody.innerHTML = filtered.map(c => `
-        <tr>
+    tbody.innerHTML = filtered.map((c, i) => `
+        <tr style="animation: slideUp 0.4s ease forwards; animation-delay: ${i * 0.05}s; opacity: 0;">
             <td><input type="checkbox" class="case-checkbox" data-id="${c.id}"></td>
             <td><span style="color: var(--indigo-400); font-weight: 600;">${c.id}</span></td>
             <td>
@@ -621,6 +646,31 @@ function renderCasesTable(filter = currentFilter) {
                     </button>` : ''}
                 </div>
             </td>
+        </tr>
+    `).join('');
+}
+
+function renderTableSkeleton() {
+    const tbody = document.getElementById('cases-table-body');
+    if (!tbody) return;
+    
+    tbody.innerHTML = Array(5).fill(0).map(() => `
+        <tr>
+            <td><div class="skeleton" style="width: 16px; height: 16px;"></div></td>
+            <td><div class="skeleton" style="width: 60px; height: 14px;"></div></td>
+            <td>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <div class="skeleton" style="width: 100px; height: 14px;"></div>
+                    <div class="skeleton" style="width: 80px; height: 10px;"></div>
+                </div>
+            </td>
+            <td><div class="skeleton" style="width: 70px; height: 14px;"></div></td>
+            <td><div class="skeleton" style="width: 90px; height: 14px;"></div></td>
+            <td><div class="skeleton" style="width: 50px; height: 14px;"></div></td>
+            <td><div class="skeleton" style="width: 80px; height: 20px; border-radius: 12px;"></div></td>
+            <td><div class="skeleton" style="width: 60px; height: 10px;"></div></td>
+            <td><div class="skeleton" style="width: 70px; height: 14px;"></div></td>
+            <td><div class="skeleton" style="width: 30px; height: 30px; border-radius: 6px;"></div></td>
         </tr>
     `).join('');
 }
