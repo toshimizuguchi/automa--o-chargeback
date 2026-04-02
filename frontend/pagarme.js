@@ -238,66 +238,289 @@ function generateDefenseLetter(cb) {
     const endereco = cfg.endereco || '[ENDEREÇO]';
     const hoje = new Date().toLocaleDateString('pt-BR');
     const motivo = MOTIVOS_MAP[cb.motivo] || cb.motivo;
-    const items = checklistStates[cb.id] || PROOF_CHECKLISTS[cb.motivo] || [];
-    const provasText = items.map((p, i) => `   ${i + 1}. ${p.label}`).join('\n');
-
-    // DETECÇÃO DE EMPRESA (Allevo vs Quero)
+    const dataTx = cb.transacao.data ? new Date(cb.transacao.data).toLocaleDateString('pt-BR') : 'N/A';
     const isQuero = empresa.toUpperCase().includes('QUERO');
-    const nomeComercial = isQuero ? 'Quero Educação' : 'Melhor Escola';
-    const siteOficial = isQuero ? 'https://querobolsa.com.br/' : 'www.melhorescola.com.br';
+    const valorBR = cb.transacao.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+    
+    // MODELOS LITERAIS (WORD-FOR-WORD DOS PDFs)
+    const templates = {
+        'allevo-desacordo': `CARTA DE DEFESA – REAPRESENTAÇÃO DE CHARGEBACK
 
-    const carta = `CARTA DE DEFESA – REAPRESENTAÇÃO DE CHARGEBACK
-
-${empresa}
-CNPJ: ${cnpj}
-Endereço: ${endereco}
+ALLEVO SERVICOS DE INTERNET LTDA, anteriormente denominada como MELHOR ESCOLA SERVIÇOS DE INTERNET LTDA.
+CNPJ: 17.669.221/0001-50
+Endereço: Avenida Nove de Julho, nº 765, Sala 31, box nº A0169, Edifício Apollo Center, Jardim Apolo – São José dos Campos/SP
 
 Prezados,
 
-No intuito de contribuir para a adequada análise do presente processo de reapresentação de chargeback sob o código ${cb.id} referente a transação via cartão de crédito no importe de R$ ${cb.transacao.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}, apresentamos abaixo os esclarecimentos necessários.
+No intuito de contribuir para a adequada análise do presente processo de reapresentação de chargeback sob o código ${cb.id} referente a transação via cartão de crédito no importe de R$${valorBR}, apresentamos abaixo os esclarecimentos necessários.
 
 I. Da Atividade Desenvolvida pela Empresa e Natureza do Serviço Prestado
 
-O ${nomeComercial} é ${isQuero ? 'uma empresa de tecnologia educacional integrante de um ecossistema educacional consolidado, com o objetivo de ampliar o acesso de estudantes brasileiros ao ensino' : 'um produto de tecnologia educacional integrante de um ecossistema educacional consolidado, lançado em 2010, com o objetivo de ampliar o acesso de estudantes brasileiros ao ensino básico'} pelo fornecimento de bolsas de estudos.
+O Melhor Escola é um produto de tecnologia educacional integrante de um ecossistema educacional consolidado, lançado em 2010, com o objetivo de ampliar o acesso de estudantes brasileiros ao ensino básico pelo fornecimento de bolsas de estudos.
 
-Por meio de sua plataforma digital (${siteOficial}), atua como marketplace educacional, conectando responsáveis por alunos a instituições de ensino, oferecendo bolsas de estudo com descontos sobre as mensalidades.
+Por meio de sua plataforma digital (www.melhorescola.com.br), atua como marketplace educacional, conectando responsáveis por alunos a instituições de ensino, oferecendo bolsas de estudo com descontos sobre as mensalidades.
 
 A operação do produto é pautada pelos princípios da boa-fé objetiva, transparência e segurança da informação, disponibilizando aos usuários todas as condições contratuais previamente à contratação.
 
 II. Da relação consumerista
 
-${getDefenseArgument(cb.motivo, cb, isQuero)}
+O motivo de desacordo comercial pressupõe a existência de divergência relevante entre o produto ofertado e aquele efetivamente entregue, ou ainda o descumprimento das condições previamente informadas ao consumidor, o que não se verifica no presente caso.
 
-Dessa forma, resta evidenciado que o consumidor teve ciência prévia, clara e inequívoca das regras contratuais, não havendo qualquer divergência entre o serviço ofertado e aquele efetivamente disponibilizado. Inexiste, portanto, a fundamentação alegada, mas apenas a tentativa posterior de questionamento de condição expressamente aceita no ato da contratação.
+Em ${dataTx}, a consumidora ${cb.cliente.nome}, CPF nº ${cb.cliente.cpf}, realizou, de forma livre, consciente e voluntária, a contratação junto à plataforma Melhor Escola, conforme transação nº ${cb.transacao.id}, referente à aquisição de bolsa de estudos de natureza digital, após ter tido pleno acesso às informações essenciais do produto, incluindo instituição de ensino, percentual de desconto, período de vigência, valor cobrado, bem como às regras de utilização, renovação, cancelamento e reembolso.
 
-III. ${cb.motivo === 'fraude' ? 'Da Cobrança de Renovação e Ausência de Fraude' : 'Do Uso de Cartão de Terceiro e do Vínculo Familiar'}
+No momento da contratação, todas as condições comerciais foram claramente apresentadas, sendo a adesão formalizada por meio de aceite eletrônico, devidamente registrado nos sistemas da Reclamada.
 
-${cb.motivo === 'fraude' 
-    ? `A cobrança questionada refere-se à renovação/aquisição da bolsa de estudos, condição necessária para a manutenção do desconto concedido, estando o benefício ativo, vigente e em efetivo uso. Assim, em ${formatDate(cb.transacao.data)}, foi processada a transação nº ${cb.transacao.id}, objeto do presente chargeback, em estrita observância aos termos previamente aceitos.`
-    : `Cumpre esclarecer que os beneficiários finais das bolsas de estudo são, em sua maioria, menores de idade, não possuindo renda própria, sendo prática comum que o pagamento seja realizado por pais, responsáveis legais ou outros familiares. No caso concreto, as transações foram realizadas com cartão de crédito de terceiro, o qual possui vínculo familiar direto com a consumidora. Observa-se, inclusive, a coincidência de sobrenomes, afastando qualquer indício de uso indevido.`}
+PRINT METABASE
+
+Dentre tais condições, constava expressamente a política de renovação da bolsa, mediante pagamento da taxa de manutenção para o período letivo subsequente, condição indispensável para a preservação do desconto concedido, que está sendo devidamente aplicado de acordo com a confirmação da Instituição de Ensino.
+
+PRINT DE CONFIRMAÇÃO DA ESCOLA
+
+Contudo, caso o consumidor opte pelo cancelamento do benefício, ou já o tenha feito perante a Escola, é necessário que entre em contato via atendimento dessa empresa e solicite formalmente o cancelamento, que será analisado e efetuado por procedimento adequado, cessando assim as cobranças.
+
+Dessa forma, resta evidenciado que o consumidor teve ciência prévia, clara e inequívoca das regras contratuais, não havendo qualquer divergência entre o serviço ofertado e aquele efetivamente disponibilizado. Inexiste, portanto, desacordo comercial, mas apenas a tentativa posterior de questionamento de condição expressamente aceita no ato da contratação.
+
+III. Do Uso de Cartão de Terceiro e do Vínculo Familiar
+
+Cumpre esclarecer que os beneficiários finais das bolsas de estudo são, em sua maioria, menores de idade, não possuindo renda própria, sendo prática comum que o pagamento seja realizado por pais, responsáveis legais ou outros familiares.
+
+No caso concreto, ambas as transações foram realizadas com cartão de crédito de terceiro, o qual possui vínculo familiar direto com a consumidora, conforme demonstrado no termo de adesão e documentos anexos.
+
+Observa-se, inclusive, a coincidência de sobrenomes entre o titular do cartão, o responsável e o aluno beneficiário, afastando qualquer indício de uso indevido ou fraude.
 
 IV. Da Transparência das Informações e Possibilidade de Cancelamento
 
-A plataforma do ${nomeComercial} disponibiliza, de forma clara e acessível, todas as informações relativas às cobranças, histórico de pagamentos e regras contratuais, permitindo o acompanhamento integral pelo usuário a qualquer tempo. Ademais, o pedido de cancelamento é procedimento simples, amplamente divulgado, desde que observados os requisitos contratuais.
+A plataforma do Melhor Escola disponibiliza, de forma clara e acessível, todas as informações relativas às cobranças, histórico de pagamentos e regras contratuais, permitindo o acompanhamento integral pelo usuário a qualquer tempo.
+
+Ademais, o pedido de cancelamento é procedimento simples, amplamente divulgado e disponível ao consumidor, desde que observados os requisitos contratuais — o que não foi solicitado antes da cobrança questionada.
+
+Eventual desorganização financeira ou desconhecimento posterior da cobrança não configura fraude, tampouco autoriza o uso indevido do mecanismo de chargeback.
 
 V. Da Boa-fé da Empresa e da Improcedência do Chargeback
 
-No momento da contratação, os termos da bolsa e do plano foram apresentados de forma clara e objetiva, em conformidade com o art. 31 do Código de Defesa do Consumidor. Não há qualquer conduta ilícita, omissiva ou dolosa por parte da empresa. Ao contrário, a reserva da bolsa para o aluno beneficiário impediu que outro estudante usufruísse do mesmo desconto, reforçando o efetivo cumprimento da obrigação contratual.
+No momento da contratação, os termos da bolsa e do plano semestral foram apresentados de forma clara e objetiva, em conformidade com o art. 31 do Código de Defesa do Consumidor.
 
-Diante disso, resta evidente que o motivo “${cb.motivo === 'fraude' ? 'fraude' : 'desacordo comercial'}” não encontra respaldo fático ou jurídico, devendo o chargeback ser julgado improcedente.
+Não há qualquer conduta ilícita, omissiva ou dolosa por parte da empresa. Ao contrário, a reserva da bolsa para o aluno beneficiário impediu que outro estudante usufruísse do mesmo desconto, reforçando o efetivo cumprimento da obrigação contratual.
+
+Diante disso, resta evidente que o motivo “desacordo comercial” não encontra respaldo fático ou jurídico, devendo o chargeback ser julgado improcedente.
 
 VI. Conclusão
 
-Diante de todo o exposto, requer-se o reconhecimento da legitimidade da transação e o cancelamento definitivo do chargeback. 
+Diante de todo o exposto, requer-se o reconhecimento da legitimidade da transação e o cancelamento definitivo do chargeback, com a consequente manutenção do valor repassado à empresa.
+
+Anexamos os documentos comprobatórios que demonstram a regularidade da operação.
 
 Certos de que os esclarecimentos prestados são suficientes para uma decisão favorável, agradecemos a atenção.
 
 Atenciosamente,
-Departamento Financeiro - ${nomeComercial}
-Responsável: ${resp}
-Data: ${hoje}`;
+Departamento Financeiro - Melhor Escola`,
 
-    body.textContent = carta;
+        'allevo-fraude': `CARTA DE DEFESA – REAPRESENTAÇÃO DE CHARGEBACK
+
+ALLEVO SERVICOS DE INTERNET LTDA, anteriormente denominada como MELHOR ESCOLA SERVIÇOS DE INTERNET LTDA.
+CNPJ: 17.669.221/0001-50
+Endereço: Avenida Nove de Julho, nº 765, Sala 31, box nº A0169, Edifício Apollo Center, Jardim Apolo – São José dos Campos/SP
+
+Prezados,
+
+No intuito de contribuir para a adequada análise do presente processo de reapresentação de chargeback sob o código ${cb.id} referente a transação via cartão de crédito no importe de R$${valorBR}, apresentamos abaixo os esclarecimentos necessários.
+
+I. Da Atividade Desenvolvida pela Empresa e Natureza do Serviço Prestado
+
+O Melhor Escola é um produto de tecnologia educacional integrante de um ecossistema educacional consolidado, lançado em 2010, com o objetivo de ampliar o acesso de estudantes brasileiros ao ensino básico.
+
+Por meio de sua plataforma digital (www.melhorescola.com.br), atua como marketplace educacional, conectando responsáveis por alunos a instituições de ensino, oferecendo bolsas de estudo com descontos sobre as mensalidades.
+
+A operação do produto é pautada pelos princípios da boa-fé objetiva, transparência e segurança da informação, disponibilizando aos usuários todas as condições contratuais previamente à contratação.
+
+II. Da relação consumerista
+
+O mecanismo de chargeback possui como finalidade a proteção do consumidor em hipóteses de fraude efetiva ou uso indevido do meio de pagamento, o que não se verifica no presente caso.
+
+Em ${dataTx}, o(a) consumidor(a) ${cb.cliente.nome}, CPF nº ${cb.cliente.cpf}, realizou a primeira contratação junto ao Melhor Escola, conforme transação nº ${cb.transacao.id}, referente à aquisição de bolsa de estudos para o ano letivo correspondente.
+
+Na ocasião, a consumidora aderiu expressamente à política de renovação da bolsa, mediante pagamento da taxa de manutenção para o período letivo subsequente, conforme aceite eletrônico devidamente registrado e comprovado nos documentos anexos.
+
+Dessa forma, resta inequívoco que a consumidora teve pleno conhecimento prévio das regras contratuais, incluindo a cobrança recorrente referente à manutenção do benefício, inexistindo qualquer vício de consentimento.
+
+PRINT METABASE
+
+III. Da Cobrança de Renovação e Ausência de Fraude
+
+A cobrança questionada refere-se à renovação da bolsa de estudos, condição necessária para a manutenção do desconto concedido, estando o benefício ativo, vigente e em efetivo uso.
+
+Assim, em ${formatDate(cb.dataRecebimento)}, foi processada a transação nº ${cb.id.replace('CB-', '')}, objeto do presente chargeback, em estrita observância aos termos previamente aceitos.
+
+IV. Do Uso de Cartão de Terceiro e do Vínculo Familiar
+
+Cumpre esclarecer que os beneficiários finais das bolsas de estudo são, em sua maioria, menores de idade, não possuindo renda própria, sendo prática comum que o pagamento seja realizado por pais, responsáveis legais ou outros familiares.
+
+No caso concreto, ambas as transações foram realizadas com cartão de crédito de terceiro, o qual possui vínculo familiar direto com a consumidora e com o beneficiário da bolsa, conforme demonstrado no termo de adesão e documentos anexos.
+
+Observa-se, inclusive, a coincidência de sobrenomes entre o titular do cartão, o responsável e o aluno beneficiário, afastando qualquer indício de uso indevido ou fraude.
+
+PRINT DE COMPROVANTE
+
+V. Da Transparência das Informações e Possibilidade de Cancelamento
+
+A plataforma do Melhor Escola disponibiliza, de forma clara e acessível, todas as informações relativas às cobranças, histórico de pagamentos e regras contratuais, permitindo o acompanhamento integral pelo usuário a qualquer tempo.
+
+Ademais, o pedido de cancelamento é procedimento simples, amplamente divulgado e disponível ao consumidor, desde que observados os requisitos contratuais — o que não foi solicitado antes da cobrança questionada.
+
+Eventual desorganização financeira ou desconhecimento posterior da cobrança não configura fraude, tampouco autoriza o uso indevido do mecanismo de chargeback.
+
+VI. Da Boa-fé da Empresa e da Improcedência do Chargeback
+
+No momento da contratação, os termos da bolsa e do plano semestral foram apresentados de forma clara e objetiva, em conformidade com o art. 31 do Código de Defesa do Consumidor.
+
+Não há qualquer conduta ilícita, omissiva ou dolosa por parte da empresa. Ao contrário, a reserva da bolsa para o aluno beneficiário impediu que outro estudante usufruísse do mesmo desconto, reforçando o efetivo cumprimento da obrigação contratual.
+
+Diante disso, resta evidente que o motivo “fraude” não encontra respaldo fático ou jurídico, devendo o chargeback ser julgado improcedente.
+
+VII. Conclusão
+
+Diante de todo o exposto, requer-se o reconhecimento da legitimidade da transação e o cancelamento definitivo do chargeback, com a consequente manutenção do valor repassado à empresa.
+
+Anexamos os documentos comprobatórios que demonstram a regularidade da operação.
+
+Certos de que os esclarecimentos prestados são suficientes para uma decisão favorável, agradecemos a atenção.
+
+Atenciosamente,
+Departamento Financeiro - Melhor Escola`,
+
+        'quero-desacordo': `CARTA DE DEFESA – REAPRESENTAÇÃO DE CHARGEBACK
+
+QUERO EDUCAÇÃO SERVICOS DE INTERNET LTDA
+CNPJ: 10.542.212/0001-54
+Endereço: Avenida Nove de Julho, nº 765, Sala 31, box nº A0169, Edifício Apollo Center, Jardim Apolo – São José dos Campos/SP
+
+Prezados,
+
+No intuito de contribuir para a adequada análise do presente processo de reapresentação de chargeback sob o código ${cb.id} referente a transação via cartão de crédito no importe de R$${valorBR}, apresentamos abaixo os esclarecimentos necessários.
+
+I. Da Atividade Desenvolvida pela Empresa e Natureza do Serviço Prestado
+
+O Quero Educação é uma empresa de tecnologia educacional integrante de um ecossistema educacional consolidado, com o objetivo de ampliar o acesso de estudantes brasileiros ao ensino pelo fornecimento de bolsas de estudos.
+
+Por meio de sua plataforma digital (https://querobolsa.com.br/), atua como marketplace educacional, conectando responsáveis por alunos a instituições de ensino, oferecendo bolsas de estudo com descontos sobre as mensalidades.
+
+A operação do produto é pautada pelos princípios da boa-fé objetiva, transparência e segurança da informação, disponibilizando aos usuários todas as condições contratuais previamente à contratação.
+
+II. Da relação consumerista
+
+O motivo de desacordo comercial pressupõe a existência de divergência relevante entre o produto ofertado e aquele efetivamente entregue, ou ainda o descumprimento das condições previamente informadas ao consumidor, o que não se verifica no presente caso.
+
+Em ${dataTx}, o(a) consumidor(a) ${cb.cliente.nome}, CPF nº ${cb.cliente.cpf}, realizou, de forma livre, consciente e voluntária, a contratação junto à plataforma Quero Bolsa, conforme transação nº ${cb.transacao.id}, referente à aquisição de bolsa de estudos de natureza digital, após ter tido pleno acesso às informações essenciais do produto, incluindo instituição de ensino, percentual de desconto, período de vigência, valor cobrado, bem como às regras de utilização, renovação, cancelamento e reembolso.
+
+No momento da contratação, todas as condições comerciais foram claramente apresentadas, sendo a adesão formalizada por meio de aceite eletrônico, devidamente registrado nos sistemas da Reclamada.
+
+PRINT METABASE
+
+Dentre tais condições, constava expressamente a política de renovação da bolsa, mediante pagamento da taxa de manutenção para o período letivo subsequente, condição indispensável para a preservação do desconto concedido, que está sendo devidamente aplicado de acordo com a confirmação da Instituição de Ensino.
+
+PRINT DE CONFIRMAÇÃO DA ESCOLA
+
+Contudo, caso o consumidor opte pelo cancelamento do benefício, ou já o tenha feito perante a Instituição de Ensino, é necessário que entre em contato via atendimento dessa empresa e solicite formalmente o cancelamento, que será analisado e efetuado por procedimento adequado, cessando assim as cobranças.
+
+Dessa forma, resta evidenciado que o consumidor teve ciência prévia, clara e inequívoca das regras contratuais, não havendo qualquer divergência entre o serviço ofertado e aquele efetivamente disponibilizado. Inexiste, portanto, desacordo comercial, mas apenas a tentativa posterior de questionamento de condição expressamente aceita no ato da contratação.
+
+III. Da Transparência das Informações e Possibilidade de Cancelamento
+
+A plataforma do Quero Educação disponibiliza, de forma clara e acessível, todas as informações relativas às cobranças, histórico de pagamentos e regras contratuais, permitindo o acompanhamento integral pelo usuário a qualquer tempo.
+
+Ademais, o pedido de cancelamento é procedimento simples, amplamente divulgado e disponível ao consumidor, desde que observados os requisitos contratuais — o que não foi solicitado antes da cobrança questionada.
+
+Eventual desorganização financeira ou desconhecimento posterior da cobrança não configura fraude, tampouco autoriza o uso indevido do mecanismo de chargeback.
+
+IV. Da Boa-fé da Empresa e da Improcedência do Chargeback
+
+No momento da contratação, os termos da bolsa e do plano semestral foram apresentados de forma clara e objetiva, em conformidade com o art. 31 do Código de Defesa do Consumidor.
+
+Não há qualquer conduta ilícita, omissiva ou dolosa por parte da empresa. Ao contrário, a reserva da bolsa para o aluno beneficiário impediu que outro estudante usufruísse do mesmo desconto, reforçando o efetivo cumprimento da obrigação contratual.
+
+Diante disso, resta evidente que o motivo “desacordo comercial” não encontra respaldo fático ou jurídico, devendo o chargeback ser julgado improcedente.
+
+V. Conclusão
+
+Diante de todo o exposto, requer-se o reconhecimento da legitimidade da transação e o cancelamento definitivo do chargeback, com a consequente manutenção do valor repassado à empresa.
+
+Anexamos os documentos comprobatórios que demonstram a regularidade da operação.
+
+Certos de que os esclarecimentos prestados são suficientes para uma decisão favorável, agradecemos a atenção.
+
+Atenciosamente,
+Departamento Financeiro - Quero Educação`,
+
+        'quero-fraude': `CARTA DE DEFESA – REAPRESENTAÇÃO DE CHARGEBACK
+
+QUERO EDUCAÇÃO SERVICOS DE INTERNET LTDA
+CNPJ: 10.542.212/0001-54
+Endereço: Avenida Nove de Julho, nº 765, Sala 31, box nº A0169, Edifício Apollo Center, Jardim Apolo – São José dos Campos/SP
+
+Prezados,
+
+No intuito de contribuir para a adequada análise do presente processo de reapresentação de chargeback sob o código ${cb.id} referente a transação via cartão de crédito no importe de R$${valorBR}, apresentamos abaixo os esclarecimentos necessários.
+
+I. Da Atividade Desenvolvida pela Empresa e Natureza do Serviço Prestado
+
+O Quero Educação é uma empresa de tecnologia educacional integrante de um ecossistema educacional consolidado, com o objetivo de ampliar o acesso de estudantes brasileiros ao ensino pelo fornecimento de bolsas de estudos.
+
+Por meio de sua plataforma digital (https://querobolsa.com.br/), atua como marketplace educacional, conectando responsáveis por alunos a instituições de ensino, oferecendo bolsas de estudo com descontos sobre as mensalidades.
+
+A operação do produto é pautada pelos princípios da boa-fé objetiva, transparência e segurança da informação, disponibilizando aos usuários todas as condições contratuais previamente à contratação.
+
+II. Da relação consumerista
+
+O mecanismo de chargeback possui como finalidade a proteção do consumidor em hipóteses de fraude efetiva ou uso indevido do meio de pagamento, o que não se verifica no presente caso.
+
+Em ${dataTx}, o(a) consumidor(a) ${cb.cliente.nome}, CPF nº ${cb.cliente.cpf}, realizou a primeira contratação junto ao Quero Educação, conforme transação nº ${cb.transacao.id}, referente à aquisição de bolsa de estudos para o ano letivo correspondente.
+
+Na ocasião, a consumidora aderiu expressamente à política de renovação da bolsa, mediante pagamento da taxa de manutenção para o período letivo subsequente, conforme aceite eletrônico devidamente registrado e comprovado nos documentos anexos.
+
+Dessa forma, resta inequívoco que a consumidora teve pleno conhecimento prévio das regras contratuais, incluindo a cobrança recorrente referente à manutenção do benefício, inexistindo qualquer vício de consentimento.
+
+PRINT METABASE
+
+III. Da Cobrança de Renovação e Ausência de Fraude
+
+A cobrança questionada refere-se à renovação da bolsa de estudos, condição necessária para a manutenção do desconto concedido, estando o benefício ativo, vigente e em efetivo uso.
+
+Assim, em ${formatDate(cb.dataRecebimento)}, foi processada a transação nº ${cb.id.replace('CB-', '')}, objeto do presente chargeback, em estrita observância aos termos previamente aceitos.
+
+IV. Da Transparência das Informações e Possibilidade de Cancelamento
+
+A plataforma do Quero Educação disponibiliza, de forma clara e acessível, todas as informações relativas às cobranças, histórico de pagamentos e regras contratuais, permitindo o acompanhamento integral pelo usuário a qualquer tempo.
+
+Ademais, o pedido de cancelamento é procedimento simples, amplamente divulgado e disponível ao consumidor, desde que observados os requisitos contratuais — o que não foi solicitado antes da cobrança questionada.
+
+Eventual desorganização financeira ou desconhecimento posterior da cobrança não configura fraude, tampouco autoriza o uso indevido do mecanismo de chargeback.
+
+V. Da Boa-fé da Empresa e da Improcedência do Chargeback
+
+No momento da contratação, os termos da bolsa e do plano semestral foram apresentados de forma clara e objetiva, em conformidade com o art. 31 do Código de Defesa do Consumidor.
+
+Não há qualquer conduta ilícita, omissiva ou dolosa por parte da empresa. Ao contrário, a reserva da bolsa para o aluno beneficiário impediu que outro estudante usufruísse do mesmo desconto, reforçando o efetivo cumprimento da obrigação contratual.
+
+Diante disso, resta evidente que o motivo “fraude” não encontra respaldo fático ou jurídico, devendo o chargeback ser julgado improcedente.
+
+VI. Conclusão
+
+Diante de todo o exposto, requer-se o reconhecimento da legitimidade da transação e o cancelamento definitivo do chargeback, com a consequente manutenção do valor repassado à empresa.
+
+Anexamos os documentos comprobatórios que demonstram a regularidade da operação.
+
+Certos de que os esclarecimentos prestados são suficientes para uma decisão favorável, agradecemos a atenção.
+
+Atenciosamente,
+Departamento Financeiro - Quero Educação`
+    };
+
+    // Escolhe a chave baseada na empresa (Allevo ou Quero) e no motivo (Fraude ou Desacordo)
+    const motiveKey = cb.motivo === 'fraude' ? 'fraude' : 'desacordo';
+    const typeKey = isQuero ? 'quero' : 'allevo';
+    const finalKey = `${typeKey}-${motiveKey}`;
+    
+    body.textContent = templates[finalKey] || templates['allevo-desacordo'];
 }
 
 function getDefenseArgument(motivo, cb, isQuero = false) {
